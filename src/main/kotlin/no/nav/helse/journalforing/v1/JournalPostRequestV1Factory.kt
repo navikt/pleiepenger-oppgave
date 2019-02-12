@@ -22,7 +22,7 @@ object JournalPostRequestV1Factory {
         tema: Tema,
         kanal: Kanal,
         sakId: SakId,
-        sakSystem: SakSystem,
+        fagSystem: FagSystem,
         dokumenter: List<DokumentV1>,
         mottatt: ZonedDateTime,
         dokumentType: DokumentType) : JournalPostRequest {
@@ -36,11 +36,11 @@ object JournalPostRequestV1Factory {
             bruker = lagAktorStruktur(aktorId = mottaker),
             avsender = lagAktorStruktur(aktorId = mottaker), // I Versjon 1 er det kun innlogget bruker som laster opp vedlegg og fyller ut søknad, så bruker == avsender
             tema = tema.value,
-            kanalReferanseId = "${sakSystem.kode}-${sakId.value}", // I Versjon 1 settes ID fra sak som kanalReferenseId - Om flere journalføringer blir gjort på en sak er ikke denne unik...
+            kanalReferanseId = "${fagSystem.kode}-${sakId.value}", // I Versjon 1 settes ID fra sak som kanalReferenseId - Om flere journalføringer blir gjort på en sak er ikke denne unik...
             forsendelseMottatt = formatDate(mottatt),
             forsendelseInnsendt = formatDate(ZonedDateTime.now()),
             mottaksKanal = kanal.value,
-            arkivSak = ArkivSak(arkivSakId = sakId.value, arkivSakSystem = sakSystem.kode)
+            arkivSak = ArkivSak(arkivSakId = sakId.value, arkivSakSystem = fagSystem.kode)
         )
 
         var hovedDokument : Dokument? = null

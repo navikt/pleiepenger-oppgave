@@ -1,6 +1,6 @@
 package no.nav.helse.journalforing
 
-data class SakSystem(
+data class FagSystem(
     val navn: String,
     val kode: String
 )
