@@ -22,7 +22,7 @@ class PleiepengerJoarkWithoutMocks {
             // nav.authorization.service_account.password Må fortsatt settes som parameter ved oppstart utenom koden
 
             val q1Args = TestConfiguration.asArray(TestConfiguration.asMap(
-                port = 8888,
+                port = 8113,
                 tokenUrl = "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
                 joarkInngaaendeForsendelseUrl = "https://dokmotinngaaende-q1.nais.preprod.local/rest/mottaInngaaendeForsendelse",
                 jwkSetUrl = "https://security-token-service.nais.preprod.local/rest/v1/sts/jwks",
