@@ -1,6 +1,7 @@
 package no.nav.helse.journalforing.api
 
 import io.ktor.application.call
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.ApplicationRequest
 import io.ktor.request.header
@@ -16,8 +17,6 @@ import org.slf4j.LoggerFactory
 
 private val logger: Logger = LoggerFactory.getLogger("nav.journalforingApis")
 
-private const val CORRELATION_ID_HEADER = "Nav-Call-Id"
-
 
 fun Route.journalforingApis(
     journalforingV1Service: JournalforingV1Service
@@ -25,7 +24,7 @@ fun Route.journalforingApis(
 
     post("/v1/journalforing") {
         val melding = call.receive<MeldingV1>()
-        val metadata = MetadataV1(version = 1, correlationId = call.request.getCorrelationId())
+        val metadata = MetadataV1(version = 1, correlationId = call.request.getCorrelationId(), requestId = call.request.getRequestId())
         val journalPostId = journalforingV1Service.journalfor(melding = melding, metaData = metadata)
 
         call.respond(HttpStatusCode.OK, JournalforingResponse(journalPostId = journalPostId.value))
@@ -33,7 +32,11 @@ fun Route.journalforingApis(
 }
 
 private fun ApplicationRequest.getCorrelationId(): String {
-    return header(CORRELATION_ID_HEADER) ?: throw ManglerCorrelationId()
+    return header(HttpHeaders.XCorrelationId) ?: throw ManglerCorrelationId()
+}
+
+private fun ApplicationRequest.getRequestId(): String? {
+    return header(HttpHeaders.XRequestId)
 }
 
 data class JournalforingResponse(val journalPostId: String)

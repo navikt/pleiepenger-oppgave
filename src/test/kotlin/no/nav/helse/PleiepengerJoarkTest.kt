@@ -99,7 +99,7 @@ class PleiepengerJoarkTest {
         with(engine) {
             handleRequest(HttpMethod.Post, "/v1/journalforing") {
                 addHeader(HttpHeaders.Authorization, "Bearer $accessToken")
-                addHeader("Nav-Call-Id", "123156")
+                addHeader(HttpHeaders.XCorrelationId, "123156")
                 setBody(objectMapper.writeValueAsString(request))
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
