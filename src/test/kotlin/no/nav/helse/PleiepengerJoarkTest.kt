@@ -100,6 +100,7 @@ class PleiepengerJoarkTest {
             handleRequest(HttpMethod.Post, "/v1/journalforing") {
                 addHeader(HttpHeaders.Authorization, "Bearer $accessToken")
                 addHeader(HttpHeaders.XCorrelationId, "123156")
+                addHeader(HttpHeaders.ContentType, "application/json")
                 setBody(objectMapper.writeValueAsString(request))
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
