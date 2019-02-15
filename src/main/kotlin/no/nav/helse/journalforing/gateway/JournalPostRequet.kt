@@ -22,8 +22,8 @@ internal data class ForsendelseInformasjon(
 
 internal data class Dokument(
     val tittel: String,
-    val dokumentTypeId: String? = null,
-    val brevkode: String? = null,
+    val dokumentTypeId: String? = null, // Enten må dokumentId være satt
+    val brevkode: String? = null, // Eller brevkode + dokumentkategori
     val dokumentkategori: String? = null,
     val dokumentVariant: List<DokumentVariant>
 )

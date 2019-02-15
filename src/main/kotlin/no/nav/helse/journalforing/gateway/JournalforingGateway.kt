@@ -13,6 +13,7 @@ import no.nav.helse.HttpRequest
 import no.nav.helse.systembruker.SystembrukerService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.IllegalStateException
 import java.net.URL
 
 private val logger: Logger = LoggerFactory.getLogger("nav.JournalforingGateway")
@@ -42,10 +43,16 @@ class JournalforingGateway(
         httpRequest.body = request
         httpRequest.url(joarkInngaaendeForsendelseUrl)
 
-        return HttpRequest.monitored(
+        val response = HttpRequest.monitored<JournalPostResponse>(
             httpClient = httpClient,
             httpRequest = httpRequest,
             histogram = nyJournalforing
         )
+
+        if (request.forsokEndeligJF && JournalTilstand.ENDELIG_JOURNALFOERT != journalTilstandFraString(response.journalTilstand)) {
+            throw IllegalStateException("Journalføring '%$response' var forventet å bli endelig journalført, men ble det ikke..")
+        } else {
+            return response
+        }
     }
 }
