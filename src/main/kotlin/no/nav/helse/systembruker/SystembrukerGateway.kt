@@ -31,9 +31,9 @@ class SystembrukerGateway(
     private val completeUrl : URL
 
     init {
-        val queryParameters : MutableMap<String, String> = mutableMapOf(Pair("grant_type","client_credentials"))
+        val queryParameters : MutableMap<String, List<String>> = mutableMapOf(Pair("grant_type", listOf("client_credentials")))
         if (!scopes.isEmpty()) {
-            queryParameters["scope"] = getScopesAsSpaceDelimitedList(scopes)
+            queryParameters["scope"] = listOf(getScopesAsSpaceDelimitedList(scopes))
         }
 
         completeUrl = HttpRequest.buildURL(baseUrl = tokenUrl, queryParameters = queryParameters)

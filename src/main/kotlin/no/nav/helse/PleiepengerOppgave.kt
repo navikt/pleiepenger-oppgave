@@ -18,6 +18,10 @@ import io.ktor.routing.Routing
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.hotspot.DefaultExports
+import no.nav.helse.behandlendeenhet.BehandlendeEnhetService
+import no.nav.helse.behandlendeenhet.SparkelGateway
+import no.nav.helse.oppgave.api.metadataStatusPages
+import no.nav.helse.oppgave.api.oppgaveApis
 import no.nav.helse.systembruker.SystembrukerGateway
 import no.nav.helse.systembruker.SystembrukerService
 import no.nav.helse.validering.valideringStatusPages
@@ -93,7 +97,7 @@ fun Application.pleiepengerOppgave() {
     install(StatusPages) {
         defaultStatusPages()
         valideringStatusPages()
-        //metadataStatusPages()
+        metadataStatusPages()
     }
 
     val systembrukerService = SystembrukerService(
@@ -109,6 +113,17 @@ fun Application.pleiepengerOppgave() {
     install(Routing) {
         authenticate {
         }
+
+        // TODO: Legg til oppggaveApis i authenticate når testet ferdig
+        oppgaveApis(
+            behandlendeEnhetService = BehandlendeEnhetService(
+                sparkelGateway = SparkelGateway(
+                    httpClient = sparkelOgOppgaeHttpClient,
+                    baseUrl = configuration.getSparkelBaseUrl(),
+                    systembrukerService = systembrukerService
+                )
+            )
+        )
         monitoring(
             collectorRegistry = collectorRegistry
         )

@@ -63,14 +63,16 @@ object HttpRequest {
     fun buildURL(
         baseUrl: URL,
         pathParts: List<String> = listOf(),
-        queryParameters: Map<String, String> = mapOf()
+        queryParameters: Map<String, List<String>> = mapOf()
     ): URL {
         val withBasePath= mutableListOf(baseUrl.path)
         withBasePath.addAll(pathParts)
 
         val parametersBuilder = ParametersBuilder()
         queryParameters.forEach { queryParameter ->
-            parametersBuilder.append(queryParameter.key, queryParameter.value)
+            queryParameter.value.forEach { it ->
+                parametersBuilder.append(queryParameter.key, it)
+            }
         }
 
         val urlBuilder = URLBuilder(
