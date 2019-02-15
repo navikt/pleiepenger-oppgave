@@ -12,7 +12,7 @@ import java.net.URL
 import java.util.*
 
 /**
- * Systembruker trenger AD-gruppe for "tema" som brukes mot Joark (Her OMS)
+ * Systembruker trenger AD-gruppe "0000-GA-SAK"
  */
 
 private val getAccessTokenHistogram = Histogram.build(
@@ -21,8 +21,8 @@ private val getAccessTokenHistogram = Histogram.build(
 ).register()
 
 class SystembrukerGateway(
-    private val username: String,
-    password: String,
+    clientId: String,
+    clientSecret: String,
     scopes: List<String>,
     tokenUrl: URL,
     private val httpClient: HttpClient
@@ -40,7 +40,7 @@ class SystembrukerGateway(
 
         httpRequest = HttpRequestBuilder()
         httpRequest.url(completeUrl)
-        httpRequest.header(HttpHeaders.Authorization, getAuthorizationHeader(username, password))
+        httpRequest.header(HttpHeaders.Authorization, getAuthorizationHeader(clientId, clientSecret))
         httpRequest.method = HttpMethod.Get
     }
 
@@ -55,8 +55,8 @@ class SystembrukerGateway(
 
 data class Response(val accessToken : String, val expiresIn: Long)
 
-private fun getAuthorizationHeader(username : String, password: String) : String {
-    val auth = "$username:$password"
+private fun getAuthorizationHeader(clientId: String, clientSecret: String) : String {
+    val auth = "$clientId:$clientSecret"
     return "Basic ${Base64.getEncoder().encodeToString(auth.toByteArray())}"
 }
 
