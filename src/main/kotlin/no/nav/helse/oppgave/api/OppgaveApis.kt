@@ -40,5 +40,3 @@ private fun ApplicationRequest.getCorrelationId(): String {
 private fun ApplicationRequest.getRequestId(): String? {
     return header(HttpHeaders.XRequestId)
 }
-
-data class SakResponse(val sakId: String)
