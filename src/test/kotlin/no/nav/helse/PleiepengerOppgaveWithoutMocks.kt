@@ -22,7 +22,7 @@ class PleiepengerOppgaveWithoutMocks {
             // nav.authorization.service_account.client_secret Må fortsatt settes som parameter ved oppstart utenom koden
 
             val q1Args = TestConfiguration.asArray(TestConfiguration.asMap(
-                port = 8113,
+                port = 8123,
                 tokenUrl = "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
                 sparkelBaseUrl = "https://sparkel.nais.preprod.local",
                 oppgaveBaseUrl = "https://oppgave.nais.preprod.local",

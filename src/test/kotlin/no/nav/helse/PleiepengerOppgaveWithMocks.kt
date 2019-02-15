@@ -12,11 +12,11 @@ class PleiepengerOppgaveWithMocks {
         @JvmStatic
         fun main(args: Array<String>) {
 
-            val wireMockServer = WiremockWrapper.bootstrap(port = 8111)
+            val wireMockServer = WiremockWrapper.bootstrap(port = 8121)
 
             val testArgs = TestConfiguration.asArray(TestConfiguration.asMap(
                 wireMockServer = wireMockServer,
-                port = 8112
+                port = 8122
             ))
 
             Runtime.getRuntime().addShutdownHook(object : Thread() {
