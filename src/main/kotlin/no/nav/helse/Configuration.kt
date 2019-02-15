@@ -37,8 +37,12 @@ data class Configuration(private val config : ApplicationConfig) {
         )
     }
 
-    fun getJoarkInngaaendeForseldenseUrl() : URL {
-        return URL(getString("nav.joark.inngaaende_forsendelse_url"))
+    fun getOppgaveBaseUrl() : URL {
+        return URL(getString("nav.oppgave.base_url"))
+    }
+
+    fun getSparkelBaseUrl() : URL {
+        return URL(getString("nav.sparkel.base_url"))
     }
 
     fun getTokenUrl() : URL {

@@ -19,7 +19,7 @@ object ObjectMapper {
         return objectMapper
     }
 
-    fun joark(
+    fun sparkelOgOppgave(
         objectMapper: ObjectMapper = jacksonObjectMapper()
     ) : ObjectMapper {
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true)

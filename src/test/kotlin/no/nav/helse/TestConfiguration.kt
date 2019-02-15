@@ -9,7 +9,8 @@ object TestConfiguration {
         port : Int = 8080,
         jwkSetUrl : String? = wireMockServer?.getJwksUrl(),
         tokenUrl : String? = wireMockServer?.getTokenUrl(),
-        joarkInngaaendeForsendelseUrl : String? = wireMockServer?.getJoarkInngaaendeForsendelseUrl(),
+        sparkelBaseUrl : String? = wireMockServer?.getSparkelBaseUrl(),
+        oppgaveBaseUrl : String? = wireMockServer?.getOppgaveBaseUrl(),
         issuer : String? = wireMockServer?.baseUrl(),
         authorizedSystems : String? = wireMockServer?.getSubject()
     ) : Map<String, String>{
@@ -19,7 +20,8 @@ object TestConfiguration {
             Pair("nav.authorization.jwks_url","$jwkSetUrl"),
             Pair("nav.authorization.issuer","$issuer"),
             Pair("nav.rest_api.authorized_systems","$authorizedSystems"),
-            Pair("nav.joark.inngaaende_forsendelse_url", "$joarkInngaaendeForsendelseUrl")
+            Pair("nav.sparkel.base_url", "$sparkelBaseUrl"),
+            Pair("nav.oppgave.base_url", "$oppgaveBaseUrl")
         )
     }
 

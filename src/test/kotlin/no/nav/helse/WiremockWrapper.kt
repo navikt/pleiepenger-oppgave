@@ -12,7 +12,8 @@ private val logger: Logger = LoggerFactory.getLogger("nav.WiremockWrapper")
 private const val jwkSetPath = "/auth-mock/jwk-set"
 private const val tokenPath = "/auth-mock/token"
 private const val getAccessTokenPath = "/auth-mock/get-test-access-token"
-private const val joarkInngaaendeForsendelsePath = "/joark-mock/rest/mottaInngaaendeForsendelse"
+private const val sparkelPath = "/sparkel-mock"
+private const val oppgavePath = "/oppgave-mock"
 private const val subject = "srvpleiepenger-sak"
 
 
@@ -39,7 +40,6 @@ object WiremockWrapper {
         wireMockServer.start()
         WireMock.configureFor(wireMockServer.port())
 
-        stubJoark()
         stubGetSystembrukerToken()
         stubJwkSet()
 
@@ -47,23 +47,6 @@ object WiremockWrapper {
 
         logger.info("Mock available on '{}'", wireMockServer.baseUrl())
         return wireMockServer
-    }
-
-    private fun stubJoark() {
-        WireMock.stubFor(
-            WireMock.post(WireMock.urlMatching(".*$joarkInngaaendeForsendelsePath"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("""
-                            {
-                                "journalpostId": "1234",
-                                "journalTilstand": "ENDELIG_JOURNALFOERT"
-                            }
-                        """.trimIndent())
-                )
-        )
     }
 
     private fun stubGetSystembrukerToken() {
@@ -112,8 +95,12 @@ fun WireMockServer.getTokenUrl() : String {
     return baseUrl() + tokenPath
 }
 
-fun WireMockServer.getJoarkInngaaendeForsendelseUrl() : String {
-    return baseUrl() + joarkInngaaendeForsendelsePath
+fun WireMockServer.getSparkelBaseUrl() : String {
+    return baseUrl() + sparkelPath
+}
+
+fun WireMockServer.getOppgaveBaseUrl() : String {
+    return baseUrl() + oppgavePath
 }
 
 fun WireMockServer.getSubject() : String {

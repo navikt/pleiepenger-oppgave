@@ -12,7 +12,7 @@ import java.net.URL
 import java.util.*
 
 /**
- * Systembruker trenger AD-gruppe "0000-GA-SAK"
+ * Systembruker trenger AD-gruppe "0000-GA-OPPGAVE"
  */
 
 private val getAccessTokenHistogram = Histogram.build(
