@@ -25,7 +25,7 @@ object JournalPostRequestV1Factory {
         fagSystem: FagSystem,
         dokumenter: List<DokumentV1>,
         mottatt: ZonedDateTime,
-        dokumentType: DokumentType) : JournalPostRequest {
+        typeReferanse: TypeReferanse) : JournalPostRequest {
 
         if (dokumenter.isEmpty()) {
             throw IllegalStateException("Det må sendes minst ett dokument")
@@ -48,9 +48,9 @@ object JournalPostRequestV1Factory {
 
         dokumenter.forEach { dokument ->
             if (hovedDokument == null) {
-                hovedDokument = mapDokument(dokument, dokumentType)
+                hovedDokument = mapDokument(dokument, typeReferanse)
             } else {
-                vedlegg.add(mapDokument(dokument, dokumentType))
+                vedlegg.add(mapDokument(dokument, typeReferanse))
             }
         }
 
@@ -79,22 +79,38 @@ object JournalPostRequestV1Factory {
         ))
     }
 
-    private fun mapDokument(dokument : DokumentV1, dokumentType: DokumentType) : Dokument {
+    private fun mapDokument(dokument : DokumentV1, typeReferanse: TypeReferanse) : Dokument {
         val arkivFilType = getArkivFilType(dokument)
-
-        return Dokument(
-            dokument.tittel,
-            dokumentTypeId = dokumentType.value,
-            dokumentVariant = listOf(
-                DokumentVariant(
-                    arkivFilType = arkivFilType,
-                    variantFormat = getVariantFormat(
-                        arkivFilType
-                    ),
-                    dokument = dokument.innhold
-                )
+        val dokumentVariant = listOf(
+            DokumentVariant(
+                arkivFilType = arkivFilType,
+                variantFormat = getVariantFormat(
+                    arkivFilType
+                ),
+                dokument = dokument.innhold
             )
         )
+
+        when (typeReferanse) {
+            is DokumentType -> {
+                return Dokument(
+                    tittel = dokument.tittel,
+                    dokumentTypeId = typeReferanse.value,
+                    dokumentVariant = dokumentVariant
+                )
+            }
+            is BrevKode -> {
+                return Dokument(
+                    tittel = dokument.tittel,
+                    brevkode = typeReferanse.brevKode,
+                    dokumentkategori = typeReferanse.dokumentKategori,
+                    dokumentVariant = dokumentVariant
+                )
+            }
+            else -> throw IllegalStateException("Ikke støtttet type referense ${typeReferanse.javaClass.simpleName}")
+        }
+
+
     }
 
     private fun getArkivFilType(dokument: DokumentV1) : ArkivFilType {
