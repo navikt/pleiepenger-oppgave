@@ -6,6 +6,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.ApplicationRequest
 import io.ktor.request.header
 import io.ktor.request.receive
+import io.ktor.response.ApplicationResponse
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
@@ -25,7 +26,7 @@ fun Route.oppgaveApis(
         val melding = call.receive<MeldingV1>()
         val metaData = MetadataV1(
             correlationId = call.request.getCorrelationId(),
-            requestId = call.request.getRequestId(),
+            requestId = call.response.getRequestId(),
             version = 1
         )
 
@@ -42,8 +43,8 @@ private fun ApplicationRequest.getCorrelationId(): String {
     return header(HttpHeaders.XCorrelationId) ?: throw ManglerCorrelationId()
 }
 
-private fun ApplicationRequest.getRequestId(): String? {
-    return header(HttpHeaders.XRequestId)
+private fun ApplicationResponse.getRequestId(): String? {
+    return headers[HttpHeaders.XRequestId]
 }
 
 data class OppgaveResponse(val oppgaveId: String)
