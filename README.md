@@ -6,7 +6,19 @@ Kan også sende samme request som kommer på kafka-topic som et REST API-kall ti
 
 ## Versjon 1
 ### Meldingsformat
-TODO
+- "aktoer_id" for "barn" må ikke settes. Ved å sette den forsikrer tjenesten at oppgaven sendes til riktig NAV-kontor (mtp. kode 6)
+```json
+{
+	"soker": {
+		"aktoer_id": "1831212532188"
+	},
+	"barn": {
+        "aktoer_id": "1831212532189"
+	},
+	"journal_post_id": "439772720",
+	"sak_id": "137662342"
+}
+```
 
 ### Metadata
 #### Correlation ID vs Request ID
