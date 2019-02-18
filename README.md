@@ -6,14 +6,15 @@ Kan også sende samme request som kommer på kafka-topic som et REST API-kall ti
 
 ## Versjon 1
 ### Meldingsformat
-- "aktoer_id" for "barn" må ikke settes. Ved å sette den forsikrer tjenesten at oppgaven sendes til riktig NAV-kontor (mtp. kode 6)
+- "aktoer_id" for "barn" må ikke settes. Ved å sette den forsikrer tjenesten at oppgaven sendes til riktig NAV-kontor (mtp. kode 6). Om barnet ikke har noen AktørID sendes det til NAV-kontor kun basert på søkeren.
+
 ```json
 {
 	"soker": {
 		"aktoer_id": "1831212532188"
 	},
 	"barn": {
-        "aktoer_id": "1831212532189"
+		"aktoer_id": "1831212532189"
 	},
 	"journal_post_id": "439772720",
 	"sak_id": "137662342"
