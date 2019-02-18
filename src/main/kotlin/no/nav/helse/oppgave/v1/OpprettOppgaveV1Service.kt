@@ -37,10 +37,12 @@ class OpprettOppgaveV1Service(
         melding: MeldingV1,
         metaData: MetadataV1
     ) : OppgaveId {
-        logger.info(metaData.toString())
+        logger.trace(metaData.toString())
+        logger.trace("Oppretter oppgave for SakID ${melding.sakId} med JournalpostID ${melding.journalPostId}")
+        validerMelding(melding)
+
         val correlationId = CorrelationId(metaData.correlationId)
 
-        validerMelding(melding)
         logger.trace("Henter behandlende enhet.")
         logger.trace("Søkers AktørID er ${melding.soker.aktoerId}")
         val sokerAktoerId = AktoerId(melding.soker.aktoerId)
@@ -58,7 +60,7 @@ class OpprettOppgaveV1Service(
             correlationId = correlationId
         )
 
-        logger.trace("Behandlende enhet for sak ${melding.sakId} med journal post ${melding.journalPostId} er $behandlendeEnhet")
+        logger.trace("Behandlende enhet for oppgaven blir $behandlendeEnhet")
 
         val request = OpprettOppgaveRequestV1Factory.instance(
             behandlendeEnhet = behandlendeEnhet,
