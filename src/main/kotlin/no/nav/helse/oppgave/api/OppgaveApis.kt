@@ -34,7 +34,7 @@ fun Route.oppgaveApis(
             metaData = metaData
         )
 
-        call.respond(HttpStatusCode.Created, Response(oppgaveId.id))
+        call.respond(HttpStatusCode.Created, OppgaveResponse(oppgaveId.id))
     }
 }
 
@@ -46,4 +46,4 @@ private fun ApplicationRequest.getRequestId(): String? {
     return header(HttpHeaders.XRequestId)
 }
 
-private data class Response(val oppgaveId: String)
+data class OppgaveResponse(val oppgaveId: String)

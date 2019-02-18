@@ -2,7 +2,6 @@ package no.nav.helse.oppgave.v1
 
 import no.nav.helse.AktoerId
 import no.nav.helse.CorrelationId
-import no.nav.helse.ObjectMapper
 import no.nav.helse.Tema
 import no.nav.helse.behandlendeenhet.BehandlendeEnhetService
 import no.nav.helse.oppgave.*
@@ -14,6 +13,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 private val logger: Logger = LoggerFactory.getLogger("nav.OpprettOppgaveV1Service")
+private val ONLY_DIGITS = Regex("\\d+")
 
 private val GOSYS_FAGSYSTEM = FagSystem("GOSYS", "FS22") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Applikasjoner
 private val JOARK_FAGSYSTEM = FagSystem("JOARK", "AS36") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Applikasjoner
@@ -79,7 +79,6 @@ class OpprettOppgaveV1Service(
         )
 
         logger.trace("Sender melding for å opprette oppgave")
-        logger.info(ObjectMapper.sparkelOgOppgave().writeValueAsString(request))
 
         val response = oppgaveGateway.opprettOppgave(
             request = request,
@@ -93,7 +92,18 @@ class OpprettOppgaveV1Service(
 
     private fun validerMelding(melding: MeldingV1) {
         val brudd = mutableListOf<Brudd>()
-        // TODO: Validering som bør gjøres?
+        if (!melding.soker.aktoerId.matches(ONLY_DIGITS)) {
+            brudd.add(Brudd(parameter = "soker.aktoer_id", error = "${melding.soker.aktoerId} er ikke en gyldig AktørID. Kan kun være siffer."))
+        }
+        if (melding.barn.aktoerId != null && !melding.barn.aktoerId.matches(ONLY_DIGITS)) {
+            brudd.add(Brudd(parameter = "barn.aktoer_id", error = "${melding.barn.aktoerId} er ikke en gyldig AktørID. Kan kun være siffer."))
+        }
+        if (!melding.sakId.matches(ONLY_DIGITS)) {
+            brudd.add(Brudd(parameter = "sak_id", error = "${melding.sakId} er ikke en gyldig SakID. Kan kun være siffer."))
+        }
+        if (!melding.journalPostId.matches(ONLY_DIGITS)) {
+            brudd.add(Brudd(parameter = "journal_post_id", error = "${melding.journalPostId} er ikke en gyldig JournalpostID. Kan kun være siffer."))
+        }
         if (brudd.isNotEmpty()) {
             throw Valideringsfeil(brudd)
         }
