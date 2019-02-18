@@ -42,7 +42,7 @@ class SparkelGateway(
         medAktoerer : List<AktoerId>,
         tema: Tema,
         correlationId: CorrelationId
-    ) : BehandlendeEnhet {
+    ) : Enhet {
 
         val url = HttpRequest.buildURL(
             baseUrl = hentBehandlendeEnhetBaseUrl,

@@ -22,6 +22,8 @@ import no.nav.helse.behandlendeenhet.BehandlendeEnhetService
 import no.nav.helse.behandlendeenhet.SparkelGateway
 import no.nav.helse.oppgave.api.metadataStatusPages
 import no.nav.helse.oppgave.api.oppgaveApis
+import no.nav.helse.oppgave.gateway.OppgaveGateway
+import no.nav.helse.oppgave.v1.OpprettOppgaveV1Service
 import no.nav.helse.systembruker.SystembrukerGateway
 import no.nav.helse.systembruker.SystembrukerService
 import no.nav.helse.validering.valideringStatusPages
@@ -116,13 +118,21 @@ fun Application.pleiepengerOppgave() {
 
         // TODO: Legg til oppggaveApis i authenticate når testet ferdig
         oppgaveApis(
-            behandlendeEnhetService = BehandlendeEnhetService(
-                sparkelGateway = SparkelGateway(
+            opprettOppgaveV1Service = OpprettOppgaveV1Service(
+                behandlendeEnhetService = BehandlendeEnhetService(
+                    sparkelGateway = SparkelGateway(
+                        httpClient = sparkelOgOppgaeHttpClient,
+                        baseUrl = configuration.getSparkelBaseUrl(),
+                        systembrukerService = systembrukerService
+                    )
+                ),
+                oppgaveGateway = OppgaveGateway(
                     httpClient = sparkelOgOppgaeHttpClient,
-                    baseUrl = configuration.getSparkelBaseUrl(),
+                    oppgaveBaseUrl = configuration.getOppgaveBaseUrl(),
                     systembrukerService = systembrukerService
                 )
             )
+
         )
         monitoring(
             collectorRegistry = collectorRegistry

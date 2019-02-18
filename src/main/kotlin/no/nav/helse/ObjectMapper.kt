@@ -25,6 +25,7 @@ object ObjectMapper {
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true)
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        objectMapper.registerModule(JavaTimeModule())
         return objectMapper
     }
 }

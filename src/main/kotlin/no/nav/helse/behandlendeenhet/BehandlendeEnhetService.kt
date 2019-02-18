@@ -12,7 +12,7 @@ class BehandlendeEnhetService(
         barnAktoerId: AktoerId? = null,
         tema: Tema,
         correlationId: CorrelationId
-    ) : BehandlendeEnhet {
+    ) : Enhet {
         return sparkelGateway.hentBehandlendeEnhet(
             hovedAktoer = sokerAktoerId,
             medAktoerer = if (barnAktoerId == null) listOf() else listOf(barnAktoerId),

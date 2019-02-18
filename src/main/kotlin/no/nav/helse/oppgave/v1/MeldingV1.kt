@@ -3,7 +3,8 @@ package no.nav.helse.oppgave.v1
 data class MeldingV1(
     val soker : Soker,
     val barn: Barn,
-    val tema: String
+    val sakId: String,
+    val journalPostId: String
 )
 
 data class Soker (
