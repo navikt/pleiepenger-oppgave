@@ -3,7 +3,9 @@ package no.nav.helse.behandlendeenhet
 import no.nav.helse.AktoerId
 import no.nav.helse.CorrelationId
 import no.nav.helse.Tema
-
+/*
+    return Enhet(id="4432", navn="NAV Arbeid og ytelser Follo")
+ */
 class BehandlendeEnhetService(
     private val sparkelGateway: SparkelGateway
 ) {

@@ -15,7 +15,6 @@ object OpprettOppgaveRequestV1Factory {
         sokerAktoerId: AktoerId,
         prioritet: Prioritet,
         mappe: Mappe,
-        behandlingsType: BehandlingsType,
         tema: Tema,
         behandlingsTema: BehandlingsTema,
         temaGruppe: TemaGruppe,
@@ -41,8 +40,7 @@ object OpprettOppgaveRequestV1Factory {
             saksreferanse = sakId.id,
             oppgavetype = oppgaveType.value,
             behandlingstema = behandlingsTema.value,
-            temagruppe = temaGruppe.value,
-            behandlingstype = behandlingsType.value
+            temagruppe = temaGruppe.value
         )
     }
 }

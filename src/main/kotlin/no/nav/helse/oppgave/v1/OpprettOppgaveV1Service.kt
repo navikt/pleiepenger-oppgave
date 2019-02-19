@@ -20,7 +20,7 @@ private val JOARK_FAGSYSTEM = FagSystem("JOARK", "AS36") // https://kodeverk-web
 
 private val OMSORG_TEMA = Tema("OMS") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Tema
 private val PLEIEPENGER_SYKT_BARN_BEHANDLINGS_TEMA = BehandlingsTema("ab0069") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstema
-private val SOKNAD_BEHANDLIGNSTYPE = BehandlingsType("ae0034") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
+//private val SOKNAD_BEHANDLIGNSTYPE = BehandlingsType("ae0034") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
 private val BEHANDLE_SAK_MANUELT_OPPGAVE_TYPE = OppgaveType("BEH_SAK_MK") // TODO: Vi trenger vår egent oppgavetype, https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Oppgavetyper
 private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Temagrupper
 
@@ -76,7 +76,6 @@ class OpprettOppgaveV1Service(
             frist = DateUtils.nWeekdaysFromToday(FRIST_VIRKEDAGER),
             sakId = SakId(melding.sakId),
             oppgaveType = BEHANDLE_SAK_MANUELT_OPPGAVE_TYPE,
-            behandlingsType = SOKNAD_BEHANDLIGNSTYPE,
             temaGruppe = FAMILIE_TEMA_GRUPPE
         )
 

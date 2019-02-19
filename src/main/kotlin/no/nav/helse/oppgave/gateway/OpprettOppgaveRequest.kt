@@ -17,14 +17,14 @@ data class OpprettOppgaveRequest(
     val behandlingstema : String,
     val temagruppe: String,
     val oppgavetype: String,
-    val behandlingstype: String,
 
     val mappeId : String,
 
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate,
 
-    val beskrivelse : String? = null // Team oppgavehåndtering vil egentlig ikke at vi skal bruke dette feltet...
+    val beskrivelse : String? = null, // Team oppgavehåndtering vil egentlig ikke at vi skal bruke dette feltet...
+    val behandlingstype: String? = null // Om denne settes valideres det om det er gyldig kombinasjon med tema og behandlingstema. Uklart hvordan vi "får" en slik kombinasjon og om den trengs..
 )
 
 enum class Prioritet {
