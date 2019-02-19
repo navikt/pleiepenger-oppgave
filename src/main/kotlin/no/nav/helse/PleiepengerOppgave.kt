@@ -37,6 +37,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 private val logger: Logger = LoggerFactory.getLogger("nav.PleiepengerOppgave")
+private const val GENERATED_REQUEST_ID_PREFIX = "generated-"
 
 fun main(args: Array<String>): Unit  = io.ktor.server.netty.EngineMain.main(args)
 
@@ -81,12 +82,12 @@ fun Application.pleiepengerOppgave() {
             verifier(jwkProvider, configuration.getIssuer())
             realm = "pleiepenger-oppgave"
             validate { credentials ->
-                log.info("authorization attempt for ${credentials.payload.subject}")
+                logger.info("authorization attempt for ${credentials.payload.subject}")
                 if (credentials.payload.subject in authorizedSystems) {
-                    log.info("authorization ok")
+                    logger.info("authorization ok")
                     return@validate JWTPrincipal(credentials.payload)
                 }
-                log.warn("authorization failed")
+                logger.warn("authorization failed")
                 return@validate null
             }
         }
@@ -116,26 +117,24 @@ fun Application.pleiepengerOppgave() {
 
     install(Routing) {
         authenticate {
-        }
-
-        // TODO: Legg til oppggaveApis i authenticate når testet ferdig
-        oppgaveApis(
-            opprettOppgaveV1Service = OpprettOppgaveV1Service(
-                behandlendeEnhetService = BehandlendeEnhetService(
-                    sparkelGateway = SparkelGateway(
+            oppgaveApis(
+                opprettOppgaveV1Service = OpprettOppgaveV1Service(
+                    behandlendeEnhetService = BehandlendeEnhetService(
+                        sparkelGateway = SparkelGateway(
+                            httpClient = sparkelOgOppgaeHttpClient,
+                            baseUrl = configuration.getSparkelBaseUrl(),
+                            systembrukerService = systembrukerService
+                        )
+                    ),
+                    oppgaveGateway = OppgaveGateway(
                         httpClient = sparkelOgOppgaeHttpClient,
-                        baseUrl = configuration.getSparkelBaseUrl(),
+                        oppgaveBaseUrl = configuration.getOppgaveBaseUrl(),
                         systembrukerService = systembrukerService
                     )
-                ),
-                oppgaveGateway = OppgaveGateway(
-                    httpClient = sparkelOgOppgaeHttpClient,
-                    oppgaveBaseUrl = configuration.getOppgaveBaseUrl(),
-                    systembrukerService = systembrukerService
                 )
-            )
 
-        )
+            )
+        }
         monitoring(
             collectorRegistry = collectorRegistry
         )
@@ -148,7 +147,7 @@ fun Application.pleiepengerOppgave() {
     install(CallLogging) {
         callIdMdc("correlation_id")
         mdc("request_id") { call ->
-            val requestId = call.request.header(HttpHeaders.XRequestId) ?: "generated-${UUID.randomUUID()}"
+            val requestId = call.request.header(HttpHeaders.XRequestId)?.removePrefix(GENERATED_REQUEST_ID_PREFIX) ?: "$GENERATED_REQUEST_ID_PREFIX${UUID.randomUUID()}"
             call.response.header(HttpHeaders.XRequestId, requestId)
             requestId
         }

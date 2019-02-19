@@ -28,7 +28,7 @@ class PleiepengerOppgaveWithoutMocks {
                 oppgaveBaseUrl = "https://oppgave.nais.preprod.local",
                 jwkSetUrl = "https://security-token-service.nais.preprod.local/rest/v1/sts/jwks",
                 issuer = "https://security-token-service.nais.preprod.local",
-                authorizedSystems = "srvpleiepenger-opp"
+                authorizedSystems = "srvpleiepenger-opp,srvpps-prosessering"
             ))
 
 

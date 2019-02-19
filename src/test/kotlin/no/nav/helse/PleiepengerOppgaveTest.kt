@@ -35,7 +35,7 @@ class PleiepengerOppgaveTest {
 
         private val wireMockServer: WireMockServer = WiremockWrapper.bootstrap()
         private val objectMapper = ObjectMapper.server()
-        private val accessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), wireMockServer.getSubject())
+        private val authorizedAccessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), wireMockServer.getSubject())
 
 
         fun getConfig() : ApplicationConfig {
@@ -176,6 +176,38 @@ class PleiepengerOppgaveTest {
         )
     }
 
+    @Test
+    fun `mangler authorization header`() {
+        val request = MeldingV1(
+            soker = Soker(aktoerId = "1234"),
+            barn = Barn(aktoerId = "5678"),
+            sakId = "9101112",
+            journalPostId = "13141516"
+        )
+
+        requestAndAssert(
+            request = request,
+            leggTilAuthorization = false,
+            expectedCode = HttpStatusCode.Unauthorized
+        )
+    }
+
+    @Test
+    fun `request fra ikke tillatt system`() {
+        val request = MeldingV1(
+            soker = Soker(aktoerId = "1234"),
+            barn = Barn(aktoerId = "5678"),
+            sakId = "9101112",
+            journalPostId = "13141516"
+        )
+
+        requestAndAssert(
+            request = request,
+            expectedCode = HttpStatusCode.Unauthorized,
+            accessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), "srvnotauthorized")
+        )
+    }
+
     private fun faaAntallValideringsBrudd(request: MeldingV1) : Int {
         try {
             requestAndAssert(
@@ -190,10 +222,14 @@ class PleiepengerOppgaveTest {
     private fun requestAndAssert(request : MeldingV1,
                                  expectedResponse : OppgaveResponse? = null,
                                  expectedCode : HttpStatusCode? = null,
-                                 leggTilCorrelationId : Boolean = true) {
+                                 leggTilCorrelationId : Boolean = true,
+                                 leggTilAuthorization : Boolean = true,
+                                 accessToken : String = authorizedAccessToken) {
         with(engine) {
             handleRequest(HttpMethod.Post, "/v1/oppgave") {
-                addHeader(HttpHeaders.Authorization, "Bearer $accessToken")
+                if (leggTilAuthorization) {
+                    addHeader(HttpHeaders.Authorization, "Bearer $accessToken")
+                }
                 if (leggTilCorrelationId) {
                     addHeader(HttpHeaders.XCorrelationId, "123156")
                 }
@@ -201,7 +237,9 @@ class PleiepengerOppgaveTest {
                 setBody(objectMapper.writeValueAsString(request))
             }.apply {
                 assertEquals(expectedCode, response.status())
-                assertEquals(expectedResponse, objectMapper.readValue(response.content!!))
+                if (expectedResponse != null) {
+                    assertEquals(expectedResponse, objectMapper.readValue(response.content!!))
+                }
             }
         }
     }

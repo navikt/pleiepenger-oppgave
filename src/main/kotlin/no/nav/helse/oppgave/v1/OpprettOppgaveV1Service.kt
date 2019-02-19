@@ -21,8 +21,8 @@ private val JOARK_FAGSYSTEM = FagSystem("JOARK", "AS36") // https://kodeverk-web
 private val OMSORG_TEMA = Tema("OMS") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Tema
 private val PLEIEPENGER_SYKT_BARN_BEHANDLINGS_TEMA = BehandlingsTema("ab0069") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstema
 private val SOKNAD_BEHANDLIGNSTYPE = BehandlingsType("ae0034") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
-private val BEHANDLE_SAK_MANUELT_OPPGAVE_TYPE = OppgaveType("BEH_SAK_MK ") // TODO: Vi trenger vår egent oppgavetype, https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Oppgavetyper
-private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI ") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Temagrupper
+private val BEHANDLE_SAK_MANUELT_OPPGAVE_TYPE = OppgaveType("BEH_SAK_MK") // TODO: Vi trenger vår egent oppgavetype, https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Oppgavetyper
+private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Temagrupper
 
 private val PRIORITET = Prioritet.NORM
 private val MAPPE = Mappe(id = "100000095")

@@ -16,7 +16,7 @@ private const val tokenPath = "/auth-mock/token"
 private const val getAccessTokenPath = "/auth-mock/get-test-access-token"
 private const val sparkelPath = "/sparkel-mock"
 private const val oppgavePath = "/oppgave-mock"
-private const val subject = "srvpleiepenger-sak"
+private const val subject = "srvpps-prosessering"
 
 
 object WiremockWrapper {
