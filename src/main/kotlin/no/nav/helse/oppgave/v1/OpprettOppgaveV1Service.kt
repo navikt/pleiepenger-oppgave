@@ -11,6 +11,8 @@ import no.nav.helse.validering.Brudd
 import no.nav.helse.validering.Valideringsfeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 private val logger: Logger = LoggerFactory.getLogger("nav.OpprettOppgaveV1Service")
 private val ONLY_DIGITS = Regex("\\d+")
@@ -26,7 +28,6 @@ private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI") // https://kodeverk-web.nai
 
 private val PRIORITET = Prioritet.NORM
 private val MAPPE = Mappe(id = "100000095")
-private val AKTIV_VIRKEDAGER = 3
 private val FRIST_VIRKEDAGER = 10
 
 class OpprettOppgaveV1Service(
@@ -72,7 +73,7 @@ class OpprettOppgaveV1Service(
             behandlesAv = GOSYS_FAGSYSTEM,
             journalfoertI = JOARK_FAGSYSTEM,
             journalPostId = JournalPostId(melding.journalPostId),
-            aktivDato = DateUtils.nWeekdaysFromToday(AKTIV_VIRKEDAGER),
+            aktivDato = LocalDate.now(ZoneOffset.UTC),
             frist = DateUtils.nWeekdaysFromToday(FRIST_VIRKEDAGER),
             sakId = SakId(melding.sakId),
             oppgaveType = BEHANDLE_SAK_MANUELT_OPPGAVE_TYPE,
