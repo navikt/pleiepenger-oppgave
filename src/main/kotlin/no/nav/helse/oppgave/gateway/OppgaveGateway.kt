@@ -8,6 +8,7 @@ import io.ktor.http.*
 import io.prometheus.client.Histogram
 import no.nav.helse.CorrelationId
 import no.nav.helse.HttpRequest
+import no.nav.helse.ObjectMapper
 import no.nav.helse.systembruker.SystembrukerService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,11 +45,18 @@ class OppgaveGateway(
         httpRequest.body = request
         httpRequest.url(opprettOppgaveUrl)
 
-        return HttpRequest.monitored(
+        logger.info(ObjectMapper.server().writeValueAsString(request))
+
+        val response = HttpRequest.monitored<OpprettOppgaveResponse>(
             httpClient = httpClient,
             httpRequest = httpRequest,
             histogram = opprettOppgave,
             expectedStatusCodes = listOf(HttpStatusCode.Created)
         )
+
+        logger.info(ObjectMapper.server().writeValueAsString(response))
+
+
+        return response
     }
 }
