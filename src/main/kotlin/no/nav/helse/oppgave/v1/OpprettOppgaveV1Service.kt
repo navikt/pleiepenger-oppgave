@@ -28,7 +28,7 @@ private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI") // https://kodeverk-web.nai
 
 private val PRIORITET = Prioritet.NORM
 private val MAPPE = Mappe(id = "100000095")
-private val FRIST_VIRKEDAGER = 10
+private val FRIST_VIRKEDAGER = 3
 
 class OpprettOppgaveV1Service(
     private val behandlendeEnhetService: BehandlendeEnhetService,
