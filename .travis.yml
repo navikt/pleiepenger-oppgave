@@ -1,0 +1,40 @@
+sudo: required
+language: java
+jdk:
+  - openjdk11
+services:
+  - docker
+before_install:
+  - openssl aes-256-cbc -K $encrypted_f25c237cda72_key -iv $encrypted_f25c237cda72_iv
+    -in travis/helseci.key.enc -out travis/helseci.key -d
+  - git clone https://github.com/navikt/github-apps-support.git
+  - export PATH=`pwd`/github-apps-support/bin:$PATH
+  - export GH_TOKEN=$(generate-installation-token.sh `generate-jwt.sh ./travis/helseci.key
+    $GITHUB_APP_ID`)
+  - export COMMIT_SHORT=$(git rev-parse --short HEAD)
+  - export ORIGINAL_COMMITTER=$(git log -1 --pretty=format:'%an <%ae>')
+  - echo -e "machine github.com\n  login $GH_TOKEN" > ~/.netrc
+script:
+  - "./gradlew check jar"
+  - docker build --pull -t $DOCKER_IMG_NAME:$COMMIT_SHORT .
+  - |
+    set -e
+    if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; then
+      echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+      docker push $DOCKER_IMG_NAME:$COMMIT_SHORT
+      cd ..
+      fi
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"
+env:
+  global:
+    - APP_NAME=pleiepenger-oppgave
+    - DOCKER_IMG_NAME=navikt/pleiepenger-oppgave
+    - GITHUB_APP_ID=19726
+    - secure: D2DMy6+fWA7wHBbgnSl4kScymeQODkui/mr7DbCHiQbi0x9M4JDWPnfX72/TaR+mVEAkG0bLUnnT+QyjeRlw+WdZ9vRYsz4+t1aliGWVWh4QDfWF+fY5Gwz9eTmtXv6MfTk80UCvWFjDVjbpymeNmzLrDJhZa8FOhJuE+9K0mMoGIdvX97odwDd8ZkzNhFb/2PnEa56fcNbhGmOziOq9MvtxQ6n3kRgwG1ahdDsXY2g3WLJ0jESztpAEfIIyA323wcdZfN7m/lPCcYJxenE1Of/iCKNUevyXpybNapcbb6QXtzZjGFPSG3FkUxhhjTsl28coRf91q00ANME74+MRHhIZDptZW3+fneJvIu688OTrAl5OgNPF1zwtVHuEdquZy5hRouzrnoaHO+dpjXDiValne9F1WM+eKi78pppLFnqnQCM6nyfSIz31dEvPmlTu3I9jflIV9RxkKFvxs5fgAAFz3iTs5qJeKohRjHp6w19GYFjmhWW+zlqR/exV0KoTKf20/TZD7mtH3Bg5b3maXfG/sG8g+okcOqqsWqGi8zZVFRq3ioow2qKheQJwJWiKWz+5yG4T2oxtnYl5z0DZltl5KGWxOzcVT9IouW89h9ZQSGq+1fa4Fs304xGRhpE5KcKn77MMNsg9ZF2CMt+L/CGgHl+r09JKgDkP8HFYKyI=
+    - secure: jg+MNPB9GQq3UqTxeCKrqbyDKJh4LLDwCllMW7VTaDFvsdQc/UhBAnwG+IH9pz32BztIQZZS1525PWxtRxtk3bNJ2A691IIpCoaTymYw2ap1mEceWU3VAevxnkqWkYsSancRa4VrNAT08w9jucXRKHtLb2TnNLXdzvyUttCAfGKbIMm7HJUEzXqsTl5fnNXt2151uit9ebRAYEKtawlVwGi7AJWYV+zV0F5guAathr9NF5S3ygY4b/2GjjKC+g7wr04tT6oincDnhkxF8J7VDp1/E+4uWhftv+k0woe5urDIjcuah2cevpfX4h84IMrLNY0tAPerxJr2S7gjRYQN1tmVo6B0rG8K8o7zTgsafo1VnfmddbyMX9O7wchjndfWDi0FtZWNmvFhASvoDSonxvsB2g254zORZcozzzOsSQBqc8r6wiwXgtKfBGyFlWz3BNJtgxBWf/FC+32dI9EgyX8KnFqLKy2pEF+6Gb3Jx+XzIfGRTKexfGiTVr1+lFl1J+TK2J1W5mWTi3ITaWmYjfg/X8hSHopA5W3n9w8r3yGEdsnTqv1jo12w++xDoQ9CYVAXSw276UQdAyclXoH46wo414u24p1IMlKw88LF2kVtNnoewyaOoYCRzcqTVTeUm8n/bc34/bwPpMdQqv8eB34sFaULgzDyok2Z2J7+poo=
