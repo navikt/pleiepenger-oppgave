@@ -24,7 +24,8 @@ object OpprettOppgaveRequestV1Factory {
         aktivDato: LocalDate,
         frist: LocalDate,
         sakId: SakId,
-        oppgaveType: OppgaveType
+        oppgaveType: OppgaveType,
+        behandlingsType: BehandlingsType? = null
     ) : OpprettOppgaveRequest {
         return OpprettOppgaveRequest(
             tildeltEnhetsnr = behandlendeEnhet.id,
@@ -40,7 +41,8 @@ object OpprettOppgaveRequestV1Factory {
             saksreferanse = sakId.id,
             oppgavetype = oppgaveType.value,
             behandlingstema = behandlingsTema.value,
-            temagruppe = temaGruppe.value
+            temagruppe = temaGruppe.value,
+            behandlingstype = behandlingsType?.value
         )
     }
 }

@@ -17,13 +17,20 @@ import java.time.ZoneOffset
 private val logger: Logger = LoggerFactory.getLogger("nav.OpprettOppgaveV1Service")
 private val ONLY_DIGITS = Regex("\\d+")
 
-private val GOSYS_FAGSYSTEM = FagSystem("GOSYS", "FS22") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Applikasjoner
-private val JOARK_FAGSYSTEM = FagSystem("JOARK", "AS36") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Applikasjoner
+// https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Applikasjoner
+private val GOSYS_FAGSYSTEM = FagSystem("GOSYS", "FS22")
+private val JOARK_FAGSYSTEM = FagSystem("JOARK", "AS36")
+private val INFOTRYGD_FAGSYSTEM = FagSystem("INFOTRYGD", "IT00")
 
 private val OMSORG_TEMA = Tema("OMS") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Tema
-private val PLEIEPENGER_SYKT_BARN_BEHANDLINGS_TEMA = BehandlingsTema("ab0069") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstema
-//private val SOKNAD_BEHANDLIGNSTYPE = BehandlingsType("ae0034") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
-private val BEHANDLE_SAK_MANUELT_OPPGAVE_TYPE = OppgaveType("BEH_SAK_MK") // TODO: Vi trenger vår egent oppgavetype, https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Oppgavetyper
+private val PLEIEPENGER_SYKT_BARN_NY_ORDNING_BEHANDLINGS_TEMA = BehandlingsTema("ab0320") // Pleiepenger sykt barn ny ordning fom 011017 - https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstema
+
+private val DIGITAL_SOKNAD_BEHANDLIGNSTYPE = BehandlingsType("ae0227") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper TODO: Bruk denne når den er opprettet
+
+// https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Oppgavetyper
+private val BEHANDLE_SAK_OPPGAVE_TYPE = OppgaveType("BEH_SAK") // Om vi får automatisk journalføring er dette rett oppgavetype
+private val JOURNALFORING_OPPGAVE_TYPE = OppgaveType("JFR") // Så lenge vi ikke har automatisk journalføring er dette rett oppgavetype
+
 private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Temagrupper
 
 private val PRIORITET = Prioritet.NORM
@@ -69,14 +76,14 @@ class OpprettOppgaveV1Service(
             prioritet = PRIORITET,
             mappe = MAPPE,
             tema = OMSORG_TEMA,
-            behandlingsTema = PLEIEPENGER_SYKT_BARN_BEHANDLINGS_TEMA,
-            behandlesAv = GOSYS_FAGSYSTEM,
+            behandlingsTema = PLEIEPENGER_SYKT_BARN_NY_ORDNING_BEHANDLINGS_TEMA,
+            behandlesAv = INFOTRYGD_FAGSYSTEM,
             journalfoertI = JOARK_FAGSYSTEM,
             journalPostId = JournalPostId(melding.journalPostId),
             aktivDato = LocalDate.now(ZoneOffset.UTC),
             frist = DateUtils.nWeekdaysFromToday(FRIST_VIRKEDAGER),
             sakId = SakId(melding.sakId),
-            oppgaveType = BEHANDLE_SAK_MANUELT_OPPGAVE_TYPE,
+            oppgaveType = JOURNALFORING_OPPGAVE_TYPE,
             temaGruppe = FAMILIE_TEMA_GRUPPE
         )
 
