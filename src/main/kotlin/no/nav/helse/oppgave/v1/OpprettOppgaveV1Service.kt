@@ -1,5 +1,6 @@
 package no.nav.helse.oppgave.v1
 
+import io.prometheus.client.Counter
 import no.nav.helse.AktoerId
 import no.nav.helse.CorrelationId
 import no.nav.helse.Tema
@@ -13,6 +14,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.ZoneOffset
+
+private val behandlndeEnhetCounter = Counter.build()
+    .name("behandlende_enhet_counter")
+    .help("Teller på hvilken enhet som blir tildelt oppgaven i Gosys.")
+    .labelNames("behandlende_enhet")
+    .register()
 
 private val logger: Logger = LoggerFactory.getLogger("nav.OpprettOppgaveV1Service")
 private val ONLY_DIGITS = Regex("\\d+")
@@ -67,6 +74,8 @@ class OpprettOppgaveV1Service(
             tema = OMSORG_TEMA,
             correlationId = correlationId
         )
+
+        behandlndeEnhetCounter.labels(behandlendeEnhet.id).inc()
 
         logger.trace("Behandlende enhet for oppgaven blir $behandlendeEnhet")
 
