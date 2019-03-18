@@ -5,6 +5,7 @@ import no.nav.helse.AktoerId
 import no.nav.helse.CorrelationId
 import no.nav.helse.Tema
 import no.nav.helse.behandlendeenhet.BehandlendeEnhetService
+import no.nav.helse.behandlendeenhet.Enhet
 import no.nav.helse.oppgave.*
 import no.nav.helse.oppgave.gateway.OppgaveGateway
 import no.nav.helse.oppgave.gateway.Prioritet
@@ -75,7 +76,7 @@ class OpprettOppgaveV1Service(
             correlationId = correlationId
         )
 
-        behandlndeEnhetCounter.labels(behandlendeEnhet.id).inc()
+        behandlndeEnhetCounter.labels(behandlendeEnhet.metricName()).inc()
 
         logger.trace("Behandlende enhet for oppgaven blir $behandlendeEnhet")
 
@@ -126,4 +127,8 @@ class OpprettOppgaveV1Service(
             throw Valideringsfeil(brudd)
         }
     }
+}
+
+private fun Enhet.metricName(): String {
+    return navn ?: id
 }
