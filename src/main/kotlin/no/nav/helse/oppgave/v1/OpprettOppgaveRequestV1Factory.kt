@@ -23,7 +23,6 @@ object OpprettOppgaveRequestV1Factory {
         journalPostId: JournalPostId,
         aktivDato: LocalDate,
         frist: LocalDate,
-        sakId: SakId,
         oppgaveType: OppgaveType,
         behandlingsType: BehandlingsType? = null
     ) : OpprettOppgaveRequest {
@@ -38,7 +37,6 @@ object OpprettOppgaveRequestV1Factory {
             mappeId = mappe.id,
             aktivDato = aktivDato,
             fristFerdigstillelse = frist,
-            saksreferanse = sakId.id,
             oppgavetype = oppgaveType.value,
             behandlingstema = behandlingsTema.value,
             temagruppe = temaGruppe.value,

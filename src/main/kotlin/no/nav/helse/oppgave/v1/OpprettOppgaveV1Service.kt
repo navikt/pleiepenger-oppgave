@@ -54,7 +54,7 @@ class OpprettOppgaveV1Service(
         metaData: MetadataV1
     ) : OppgaveId {
         logger.trace(metaData.toString())
-        logger.trace("Oppretter oppgave for SakID ${melding.sakId} med JournalpostID ${melding.journalPostId}")
+        logger.trace("Oppretter oppgave for JournalpostID ${melding.journalPostId}")
         validerMelding(melding)
 
         val correlationId = CorrelationId(metaData.correlationId)
@@ -92,7 +92,6 @@ class OpprettOppgaveV1Service(
             journalPostId = JournalPostId(melding.journalPostId),
             aktivDato = LocalDate.now(ZoneOffset.UTC),
             frist = DateUtils.nWeekdaysFromToday(FRIST_VIRKEDAGER),
-            sakId = SakId(melding.sakId),
             oppgaveType = JOURNALFORING_OPPGAVE_TYPE,
             temaGruppe = FAMILIE_TEMA_GRUPPE
         )
@@ -116,9 +115,6 @@ class OpprettOppgaveV1Service(
         }
         if (melding.barn.aktoerId != null && !melding.barn.aktoerId.matches(ONLY_DIGITS)) {
             brudd.add(Brudd(parameter = "barn.aktoer_id", error = "${melding.barn.aktoerId} er ikke en gyldig AktørID. Kan kun være siffer."))
-        }
-        if (!melding.sakId.matches(ONLY_DIGITS)) {
-            brudd.add(Brudd(parameter = "sak_id", error = "${melding.sakId} er ikke en gyldig SakID. Kan kun være siffer."))
         }
         if (!melding.journalPostId.matches(ONLY_DIGITS)) {
             brudd.add(Brudd(parameter = "journal_post_id", error = "${melding.journalPostId} er ikke en gyldig JournalpostID. Kan kun være siffer."))

@@ -75,7 +75,6 @@ class PleiepengerOppgaveTest {
         val request = MeldingV1(
             soker = Soker(aktoerId = sokerAktoerId),
             barn = Barn(aktoerId = null),
-            sakId = "9101112",
             journalPostId = "13141516"
         )
 
@@ -108,7 +107,6 @@ class PleiepengerOppgaveTest {
         val request = MeldingV1(
             soker = Soker(aktoerId = sokerAktoerId),
             barn = Barn(aktoerId = barnAktoerId),
-            sakId = "91011121",
             journalPostId = "131415161"
         )
 
@@ -153,11 +151,10 @@ class PleiepengerOppgaveTest {
         val request = MeldingV1(
             soker = Soker(aktoerId = "FFFF"),
             barn = Barn(aktoerId = ""),
-            sakId = "1234F",
             journalPostId = ""
         )
 
-        assertEquals(4, faaAntallValideringsBrudd(request))
+        assertEquals(3, faaAntallValideringsBrudd(request))
     }
 
 
@@ -166,7 +163,6 @@ class PleiepengerOppgaveTest {
         val request = MeldingV1(
             soker = Soker(aktoerId = "1234"),
             barn = Barn(aktoerId = "5678"),
-            sakId = "9101112",
             journalPostId = "13141516"
         )
 
@@ -181,7 +177,6 @@ class PleiepengerOppgaveTest {
         val request = MeldingV1(
             soker = Soker(aktoerId = "1234"),
             barn = Barn(aktoerId = "5678"),
-            sakId = "9101112",
             journalPostId = "13141516"
         )
 
@@ -197,7 +192,6 @@ class PleiepengerOppgaveTest {
         val request = MeldingV1(
             soker = Soker(aktoerId = "1234"),
             barn = Barn(aktoerId = "5678"),
-            sakId = "9101112",
             journalPostId = "13141516"
         )
 

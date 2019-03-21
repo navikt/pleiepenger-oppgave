@@ -16,8 +16,7 @@ Kan også sende samme request som kommer på kafka-topic som et REST API-kall ti
 	"barn": {
 		"aktoer_id": "1831212532189"
 	},
-	"journal_post_id": "439772720",
-	"sak_id": "137662342"
+	"journal_post_id": "439772720"
 }
 ```
 

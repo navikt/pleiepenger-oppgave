@@ -11,7 +11,6 @@ data class OpprettOppgaveRequest(
     val journalpostkilde : String,
 
     val behandlesAvApplikasjon: String,
-    val saksreferanse: String,
 
     val tema : String,
     val behandlingstema : String,
@@ -23,6 +22,7 @@ data class OpprettOppgaveRequest(
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate,
 
+    val saksreferanse: String? = null, // Settes ikke så lenge sak opprettes i gosys
     val beskrivelse : String? = null, // Team oppgavehåndtering vil egentlig ikke at vi skal bruke dette feltet...
     val behandlingstype: String? = null // Om denne settes valideres det om det er gyldig kombinasjon med tema og behandlingstema. Uklart hvordan vi "får" en slik kombinasjon og om den trengs..
 )
