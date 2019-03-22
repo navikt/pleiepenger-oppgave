@@ -1,0 +1,136 @@
+{
+    "provider": {
+        "name": "oppgave"
+    },
+    "consumer": {
+        "name": "pleiepenger-oppgave"
+    },
+    "interactions": [
+        {
+            "description": "Request for aa opprette ny oppgave",
+            "request": {
+                "method": "POST",
+                "path": "/api/v1/oppgaver",
+                "headers": {
+                    "Authorization": "Bearer dummy",
+                    "Accept": "application/json",
+                    "X-Correlation-ID": "50e93afa-a22d-448a-8fbe-a4a4dae67eb0",
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "oppgavetype": "JFR",
+                    "mappeId": "100000095",
+                    "prioritet": "NORM",
+                    "behandlingstema": "ab0320",
+                    "temagruppe": "FMLI",
+                    "fristFerdigstillelse": "2019-03-25",
+                    "aktivDato": "2019-03-22",
+                    "journalpostkilde": "AS36",
+                    "aktoerId": "1831212532188",
+                    "tildeltEnhetsnr": "4132",
+                    "saksreferanse": null,
+                    "behandlingstype": null,
+                    "tema": "OMS",
+                    "behandlesAvApplikasjon": "IT00",
+                    "beskrivelse": null,
+                    "journalpostId": "137662692"
+                },
+                "matchingRules": {
+                    "header": {
+                        "X-Correlation-ID": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    },
+                    "body": {
+                        "$.aktoerId": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": "\\d+"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.journalpostId": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": "\\d+"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.tildeltEnhetsnr": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": "\\d+"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.aktivDato": {
+                            "matchers": [
+                                {
+                                    "match": "date",
+                                    "date": "yyyy-MM-dd"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.fristFerdigstillelse": {
+                            "matchers": [
+                                {
+                                    "match": "date",
+                                    "date": "yyyy-MM-dd"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "response": {
+                "status": 201,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "id": "58487564"
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.id": {
+                            "matchers": [
+                                {
+                                    "match": "regex",
+                                    "regex": "\\d+"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "Klar for aa opprette nye oppgaver"
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "pactSpecification": {
+            "version": "3.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.6.2"
+        }
+    }
+}

@@ -52,6 +52,8 @@ dependencies {
         exclude(group = "org.eclipse.jetty")
     }
     testCompile ("com.nimbusds:oauth2-oidc-sdk:5.56")
+    testCompile("au.com.dius:pact-jvm-consumer-junit_2.12:3.6.2")
+    testCompile("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
 }
 
 repositories {
