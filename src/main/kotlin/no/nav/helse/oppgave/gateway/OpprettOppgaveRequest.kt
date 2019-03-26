@@ -17,11 +17,11 @@ data class OpprettOppgaveRequest(
     val temagruppe: String,
     val oppgavetype: String,
 
-    val mappeId : String,
 
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate,
 
+    val mappeId : String? = null, // MappId varierer fra enhet til enhet, Så om vi ønsker en mappe ved opprettelse må også integrasjon mot /v1/mappe gjøres for å forsikre oss om at mappen finnes..
     val saksreferanse: String? = null, // Settes ikke så lenge sak opprettes i gosys
     val beskrivelse : String? = null, // Team oppgavehåndtering vil egentlig ikke at vi skal bruke dette feltet...
     val behandlingstype: String? = null // Om denne settes valideres det om det er gyldig kombinasjon med tema og behandlingstema. Uklart hvordan vi "får" en slik kombinasjon og om den trengs..

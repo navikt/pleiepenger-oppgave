@@ -73,8 +73,8 @@ class OppgavePactTests {
             .stringValue("behandlingstema", "ab0320")
             .stringValue("temagruppe", "FMLI")
             .stringValue("oppgavetype", "JFR")
-            .stringValue("mappeId", "100000095")
-
+                
+            .stringValue("mappeId", null)
             .stringValue("behandlingstype", null)
             .stringValue("beskrivelse", null)
             .stringValue("saksreferanse", null)

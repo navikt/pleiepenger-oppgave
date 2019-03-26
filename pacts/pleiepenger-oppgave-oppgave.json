@@ -19,7 +19,7 @@
                 },
                 "body": {
                     "oppgavetype": "JFR",
-                    "mappeId": "100000095",
+                    "mappeId": null,
                     "prioritet": "NORM",
                     "behandlingstema": "ab0320",
                     "temagruppe": "FMLI",

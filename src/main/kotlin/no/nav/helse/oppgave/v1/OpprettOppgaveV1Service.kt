@@ -42,8 +42,7 @@ private val JOURNALFORING_OPPGAVE_TYPE = OppgaveType("JFR") // Så lenge vi ikke
 private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Temagrupper
 
 private val PRIORITET = Prioritet.NORM
-private val MAPPE = Mappe(id = "100000095")
-private val FRIST_VIRKEDAGER = 3
+private const val FRIST_VIRKEDAGER = 3
 
 class OpprettOppgaveV1Service(
     private val behandlendeEnhetService: BehandlendeEnhetService,
@@ -84,7 +83,6 @@ class OpprettOppgaveV1Service(
             behandlendeEnhet = behandlendeEnhet,
             sokerAktoerId = sokerAktoerId,
             prioritet = PRIORITET,
-            mappe = MAPPE,
             tema = OMSORG_TEMA,
             behandlingsTema = PLEIEPENGER_SYKT_BARN_NY_ORDNING_BEHANDLINGS_TEMA,
             behandlesAv = INFOTRYGD_FAGSYSTEM,
