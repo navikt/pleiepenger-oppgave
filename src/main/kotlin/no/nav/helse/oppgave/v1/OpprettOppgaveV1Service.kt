@@ -6,6 +6,10 @@ import no.nav.helse.CorrelationId
 import no.nav.helse.Tema
 import no.nav.helse.behandlendeenhet.BehandlendeEnhetService
 import no.nav.helse.behandlendeenhet.Enhet
+import no.nav.helse.dusseldorf.ktor.core.ParameterType
+import no.nav.helse.dusseldorf.ktor.core.Throwblem
+import no.nav.helse.dusseldorf.ktor.core.ValidationProblemDetails
+import no.nav.helse.dusseldorf.ktor.core.Violation
 import no.nav.helse.oppgave.*
 import no.nav.helse.oppgave.gateway.OppgaveGateway
 import no.nav.helse.oppgave.gateway.Prioritet
@@ -107,18 +111,18 @@ class OpprettOppgaveV1Service(
     }
 
     private fun validerMelding(melding: MeldingV1) {
-        val brudd = mutableListOf<Brudd>()
+        val violations = mutableListOf<Violation>()
         if (!melding.soker.aktoerId.matches(ONLY_DIGITS)) {
-            brudd.add(Brudd(parameter = "soker.aktoer_id", error = "${melding.soker.aktoerId} er ikke en gyldig AktørID. Kan kun være siffer."))
+            violations.add(Violation(parameterName = "soker.aktoer_id", reason = "Ugyldig AktørID. Kan kun være siffer.", invalidValue = melding.soker.aktoerId, parameterType = ParameterType.ENTITY))
         }
         if (melding.barn.aktoerId != null && !melding.barn.aktoerId.matches(ONLY_DIGITS)) {
-            brudd.add(Brudd(parameter = "barn.aktoer_id", error = "${melding.barn.aktoerId} er ikke en gyldig AktørID. Kan kun være siffer."))
+            violations.add(Violation(parameterName = "barn.aktoer_id", reason = "Ugyldig AktørID. Kan kun være siffer.", invalidValue = melding.barn.aktoerId, parameterType = ParameterType.ENTITY))
         }
         if (!melding.journalPostId.matches(ONLY_DIGITS)) {
-            brudd.add(Brudd(parameter = "journal_post_id", error = "${melding.journalPostId} er ikke en gyldig JournalpostID. Kan kun være siffer."))
+            violations.add(Violation(parameterName = "journal_post_id", reason = "Ugyldig JournalpostID. Kan kun være siffer.", invalidValue = melding.journalPostId, parameterType = ParameterType.ENTITY))
         }
-        if (brudd.isNotEmpty()) {
-            throw Valideringsfeil(brudd)
+        if (violations.isNotEmpty()) {
+            throw Throwblem(ValidationProblemDetails(violations.toSet()))
         }
     }
 }

@@ -1,6 +1,6 @@
 package no.nav.helse
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.typesafe.config.ConfigFactory
 import io.ktor.config.ApplicationConfig
@@ -13,14 +13,13 @@ import io.ktor.server.testing.createTestEnvironment
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.oppgave.api.ManglerCorrelationId
-import no.nav.helse.oppgave.api.OppgaveResponse
+import no.nav.helse.dusseldorf.ktor.jackson.dusseldorfConfigured
 import no.nav.helse.oppgave.v1.Barn
 import no.nav.helse.oppgave.v1.MeldingV1
 import no.nav.helse.oppgave.v1.Soker
-import no.nav.helse.validering.Valideringsfeil
 import org.junit.AfterClass
 import org.junit.BeforeClass
+import org.skyscreamer.jsonassert.JSONAssert
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.test.*
@@ -34,7 +33,7 @@ class PleiepengerOppgaveTest {
     private companion object {
 
         private val wireMockServer: WireMockServer = WiremockWrapper.bootstrap()
-        private val objectMapper = ObjectMapper.server()
+        private val objectMapper = jacksonObjectMapper().dusseldorfConfigured()
         private val authorizedAccessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), wireMockServer.getSubject())
 
 
@@ -91,9 +90,11 @@ class PleiepengerOppgaveTest {
 
         requestAndAssert(
             request = request,
-            expectedResponse = OppgaveResponse(
-                oppgaveId = oppgaveId
-            ),
+            expectedResponse = """
+                {
+                    "oppgave_id" : "$oppgaveId"
+                }
+            """.trimIndent(),
             expectedCode = HttpStatusCode.Created
         )
     }
@@ -124,9 +125,11 @@ class PleiepengerOppgaveTest {
 
         requestAndAssert(
             request = request,
-            expectedResponse = OppgaveResponse(
-                oppgaveId = oppgaveId
-            ),
+            expectedResponse = """
+                {
+                    "oppgave_id" : "$oppgaveId"
+                }
+            """.trimIndent(),
             expectedCode = HttpStatusCode.Created
         )
     }
@@ -154,11 +157,39 @@ class PleiepengerOppgaveTest {
             journalPostId = ""
         )
 
-        assertEquals(3, faaAntallValideringsBrudd(request))
+        requestAndAssert(
+            request = request,
+            expectedResponse = """
+                {
+                    "type": "/problem-details/invalid-request-parameters",
+                    "title": "invalid-request-parameters",
+                    "status": 400,
+                    "detail": "Requesten inneholder ugyldige paramtere.",
+                    "instance": "about:blank",
+                    "invalid_parameters": [{
+                        "type": "entity",
+                        "name": "soker.aktoer_id",
+                        "reason": "Ugyldig AktørID. Kan kun være siffer.",
+                        "invalid_value": "FFFF"
+                    }, {
+                        "type": "entity",
+                        "name": "barn.aktoer_id",
+                        "reason": "Ugyldig AktørID. Kan kun være siffer.",
+                        "invalid_value": ""
+                    }, {
+                        "type": "entity",
+                        "name": "journal_post_id",
+                        "reason": "Ugyldig JournalpostID. Kan kun være siffer.",
+                        "invalid_value": ""
+                    }]
+                }
+            """.trimIndent(),
+            expectedCode = HttpStatusCode.BadRequest
+        )
     }
 
 
-    @Test(expected = ManglerCorrelationId::class)
+    @Test
     fun `request uten correlationId skal feile`() {
         val request = MeldingV1(
             soker = Soker(aktoerId = "1234"),
@@ -168,7 +199,25 @@ class PleiepengerOppgaveTest {
 
         requestAndAssert(
             request = request,
-            leggTilCorrelationId = false
+            leggTilCorrelationId = false,
+            expectedCode = HttpStatusCode.BadRequest,
+            expectedResponse = """
+                {
+                    "type": "/problem-details/invalid-request-parameters",
+                    "title": "invalid-request-parameters",
+                    "detail": "Requesten inneholder ugyldige paramtere.",
+                    "status": 400,
+                    "instance": "about:blank",
+                    "invalid_parameters" : [
+                        {
+                            "name" : "X-Correlation-ID",
+                            "reason" : "Correlation ID må settes.",
+                            "type": "header",
+                            "invalid_value": null
+                        }
+                    ]
+                }
+            """.trimIndent()
         )
     }
 
@@ -183,7 +232,8 @@ class PleiepengerOppgaveTest {
         requestAndAssert(
             request = request,
             leggTilAuthorization = false,
-            expectedCode = HttpStatusCode.Unauthorized
+            expectedCode = HttpStatusCode.Unauthorized,
+            expectedResponse = null
         )
     }
 
@@ -198,24 +248,14 @@ class PleiepengerOppgaveTest {
         requestAndAssert(
             request = request,
             expectedCode = HttpStatusCode.Unauthorized,
+            expectedResponse = null,
             accessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), "srvnotauthorized")
         )
     }
 
-    private fun faaAntallValideringsBrudd(request: MeldingV1) : Int {
-        try {
-            requestAndAssert(
-                request = request
-            )
-        } catch (cause : Valideringsfeil) {
-            return cause.brudd.size
-        }
-        return 0
-    }
-
     private fun requestAndAssert(request : MeldingV1,
-                                 expectedResponse : OppgaveResponse? = null,
-                                 expectedCode : HttpStatusCode? = null,
+                                 expectedResponse : String?,
+                                 expectedCode : HttpStatusCode,
                                  leggTilCorrelationId : Boolean = true,
                                  leggTilAuthorization : Boolean = true,
                                  accessToken : String = authorizedAccessToken) {
@@ -228,12 +268,19 @@ class PleiepengerOppgaveTest {
                     addHeader(HttpHeaders.XCorrelationId, "123156")
                 }
                 addHeader(HttpHeaders.ContentType, "application/json")
+                val requestEntity = objectMapper.writeValueAsString(request)
+                logger.info("Request Entity = $requestEntity")
                 setBody(objectMapper.writeValueAsString(request))
             }.apply {
+                logger.info("Response Entity = ${response.content}")
+                logger.info("Expected Entity = $expectedResponse")
                 assertEquals(expectedCode, response.status())
                 if (expectedResponse != null) {
-                    assertEquals(expectedResponse, objectMapper.readValue(response.content!!))
+                    JSONAssert.assertEquals(expectedResponse, response.content!!, false)
+                } else {
+                    assertEquals(expectedResponse, response.content)
                 }
+
             }
         }
     }
