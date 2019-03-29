@@ -6,10 +6,6 @@ import au.com.dius.pact.consumer.PactVerification
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.model.RequestResponsePact
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.behandlendeenhet.BehandlendeEnhetService
@@ -17,14 +13,12 @@ import no.nav.helse.behandlendeenhet.Enhet
 import no.nav.helse.behandlendeenhet.SparkelGateway
 import no.nav.helse.oppgave.gateway.OppgaveGateway
 import no.nav.helse.oppgave.v1.*
-import no.nav.helse.systembruker.Response
-import no.nav.helse.systembruker.SystembrukerGateway
-import no.nav.helse.systembruker.SystembrukerService
 import org.junit.Rule
 import org.junit.Test
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
+import no.nav.helse.dusseldorf.ktor.client.SystemCredentialsProvider
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -73,7 +67,7 @@ class OppgavePactTests {
             .stringValue("behandlingstema", "ab0320")
             .stringValue("temagruppe", "FMLI")
             .stringValue("oppgavetype", "JFR")
-                
+
             .stringValue("mappeId", null)
             .stringValue("behandlingstype", null)
             .stringValue("beskrivelse", null)
@@ -149,29 +143,17 @@ class OppgavePactTests {
     }
 
     private fun oppgaveGateway(): OppgaveGateway {
-        val httpClient = HttpClient(Apache) {
-            install(JsonFeature) {
-                serializer = JacksonSerializer { ObjectMapper.sparkelOgOppgave(this) }
-            }
-        }
-
         return OppgaveGateway(
             oppgaveBaseUrl = URL(mockProvider.url),
-            systembrukerService = SystembrukerService(
-                systembrukerGateway = mockSystembrukerGateway()
-            ),
-            httpClient = httpClient
+            systemCredentialsProvider = mockSystemCredentialsProvider()
         )
     }
 
-    private fun mockSystembrukerGateway(): SystembrukerGateway {
-        val mock = mock<SystembrukerGateway>()
+    private fun mockSystemCredentialsProvider(): SystemCredentialsProvider {
+        val mock = mock<SystemCredentialsProvider>()
         runBlocking {
-            whenever(mock.getToken()).thenReturn(
-                Response(
-                    accessToken = jwt,
-                    expiresIn = 5000
-                )
+            whenever(mock.getAuthorizationHeader()).thenReturn(
+                "Bearer $jwt"
             )
         }
         return mock

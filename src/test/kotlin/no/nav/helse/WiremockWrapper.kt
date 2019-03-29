@@ -60,7 +60,7 @@ object WiremockWrapper {
             WireMock.post(WireMock.urlPathMatching(".*$oppgavePath.*"))
                 .withRequestBody(
                     ContainsPattern("""
-                    "aktoerId" : "$sokerAktoerId"
+                    "aktoerId":"$sokerAktoerId"
                 """.trimIndent())
                 )
                 .willReturn(

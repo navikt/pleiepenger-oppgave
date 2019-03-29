@@ -47,29 +47,7 @@ fun Application.pleiepengerOppgave() {
     logProxyProperties()
     DefaultExports.initialize()
 
-    val sparkelOgOppgaeHttpClient = HttpClient(Apache) {
-        install(JsonFeature) {
-            serializer = JacksonSerializer{
-                ObjectMapper.sparkelOgOppgave(this)
-            }
-        }
-        engine {
-            customizeClient { setProxyRoutePlanner() }
-        }
-    }
-    val systembrukerHttpClient = HttpClient(Apache) {
-        install(JsonFeature) {
-            serializer = JacksonSerializer{
-                ObjectMapper.server(this)
-            }
-        }
-        engine {
-            customizeClient { setProxyRoutePlanner() }
-        }
-    }
-
     val configuration = Configuration(environment.config)
-
     val authorizedSystems = configuration.getAuthorizedSystemsForRestApi()
 
     val jwkProvider = JwkProviderBuilder(configuration.getJwksUrl())
@@ -127,17 +105,7 @@ fun Application.pleiepengerOppgave() {
         clientSecret = configuration.getServiceAccountClientSecret(),
         scopes = configuration.getServiceAccountScopes()
     )
-
-    val systembrukerService = SystembrukerService(
-        systembrukerGateway = SystembrukerGateway(
-            httpClient = systembrukerHttpClient,
-            clientId = configuration.getServiceAccountClientId(),
-            clientSecret = configuration.getServiceAccountClientSecret(),
-            scopes = configuration.getServiceAccountScopes(),
-            tokenUrl = configuration.getTokenUrl()
-        )
-    )
-
+    
     install(CallIdRequired)
 
     install(Routing) {
@@ -147,15 +115,13 @@ fun Application.pleiepengerOppgave() {
                     opprettOppgaveV1Service = OpprettOppgaveV1Service(
                         behandlendeEnhetService = BehandlendeEnhetService(
                             sparkelGateway = SparkelGateway(
-                                httpClient = sparkelOgOppgaeHttpClient,
                                 baseUrl = configuration.getSparkelBaseUrl(),
-                                systembrukerService = systembrukerService
+                                systemCredentialsProvider = systemCredentialsProvider
                             )
                         ),
                         oppgaveGateway = OppgaveGateway(
-                            httpClient = sparkelOgOppgaeHttpClient,
                             oppgaveBaseUrl = configuration.getOppgaveBaseUrl(),
-                            systembrukerService = systembrukerService
+                            systemCredentialsProvider = systemCredentialsProvider
                         )
                     )
 
