@@ -47,6 +47,9 @@ object WiremockWrapper {
 
         provideGetAccessTokenEndPoint(wireMockServer.baseUrl())
 
+        stubReady("$sparkelPath/isready")
+        stubReady("$oppgavePath/internal/ready")
+
         logger.info("Mock available on '{}'", wireMockServer.baseUrl())
         return wireMockServer
     }
@@ -112,6 +115,18 @@ object WiremockWrapper {
                             "navn": "$enhetNavn"
                         }
                         """.trimIndent())
+                )
+        )
+    }
+
+    private fun stubReady(
+        path: String
+    ) {
+        WireMock.stubFor(
+            WireMock.get(WireMock.urlPathMatching(".*$path"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
                 )
         )
     }
