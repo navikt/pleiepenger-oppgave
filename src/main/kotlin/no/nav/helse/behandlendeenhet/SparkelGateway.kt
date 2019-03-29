@@ -14,14 +14,11 @@ import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.Url
 import no.nav.helse.AktoerId
 import no.nav.helse.CorrelationId
-import no.nav.helse.HttpRequest
 import no.nav.helse.Tema
-import no.nav.helse.dusseldorf.ktor.client.MonitoredHttpClient
-import no.nav.helse.dusseldorf.ktor.client.SystemCredentialsProvider
-import no.nav.helse.dusseldorf.ktor.client.setProxyRoutePlanner
-import no.nav.helse.dusseldorf.ktor.client.sl4jLogger
+import no.nav.helse.dusseldorf.ktor.client.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -53,7 +50,7 @@ class SparkelGateway(
         }
     )
 
-    private val hentBehandlendeEnhetBaseUrl: URL = HttpRequest.buildURL(
+    private val hentBehandlendeEnhetBaseUrl: URL = Url.buildURL(
         baseUrl = baseUrl,
         pathParts = listOf("api","arbeidsfordeling", "behandlende-enhet")
     )
@@ -65,7 +62,7 @@ class SparkelGateway(
         correlationId: CorrelationId
     ) : Enhet {
 
-        val url = HttpRequest.buildURL(
+        val url = Url.buildURL(
             baseUrl = hentBehandlendeEnhetBaseUrl,
             pathParts = listOf(hovedAktoer.value),
             queryParameters = queryParameters(

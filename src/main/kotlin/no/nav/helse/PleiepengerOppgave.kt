@@ -30,8 +30,6 @@ import no.nav.helse.dusseldorf.ktor.metrics.MetricsRoute
 import no.nav.helse.oppgave.api.oppgaveApis
 import no.nav.helse.oppgave.gateway.OppgaveGateway
 import no.nav.helse.oppgave.v1.OpprettOppgaveV1Service
-import no.nav.helse.systembruker.SystembrukerGateway
-import no.nav.helse.systembruker.SystembrukerService
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -105,7 +103,7 @@ fun Application.pleiepengerOppgave() {
         clientSecret = configuration.getServiceAccountClientSecret(),
         scopes = configuration.getServiceAccountScopes()
     )
-    
+
     install(CallIdRequired)
 
     install(Routing) {

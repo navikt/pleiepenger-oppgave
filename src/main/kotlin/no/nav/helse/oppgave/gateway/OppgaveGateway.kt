@@ -14,11 +14,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.url
 import io.ktor.http.*
 import no.nav.helse.CorrelationId
-import no.nav.helse.HttpRequest
-import no.nav.helse.dusseldorf.ktor.client.MonitoredHttpClient
-import no.nav.helse.dusseldorf.ktor.client.SystemCredentialsProvider
-import no.nav.helse.dusseldorf.ktor.client.setProxyRoutePlanner
-import no.nav.helse.dusseldorf.ktor.client.sl4jLogger
+import no.nav.helse.dusseldorf.ktor.client.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -49,7 +45,7 @@ class OppgaveGateway(
         }
     )
 
-    private val opprettOppgaveUrl : URL = HttpRequest.buildURL(oppgaveBaseUrl, pathParts = listOf("api", "v1", "oppgaver"))
+    private val opprettOppgaveUrl : URL = Url.buildURL(oppgaveBaseUrl, pathParts = listOf("api", "v1", "oppgaver"))
 
     suspend fun opprettOppgave(
         request : OpprettOppgaveRequest,
