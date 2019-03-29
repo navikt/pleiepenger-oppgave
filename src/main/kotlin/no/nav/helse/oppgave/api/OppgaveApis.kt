@@ -40,7 +40,7 @@ fun Route.oppgaveApis(
 }
 
 private fun ApplicationRequest.getCorrelationId(): String {
-    return header(HttpHeaders.XCorrelationId) ?: throw ManglerCorrelationId()
+    return header(HttpHeaders.XCorrelationId) ?: throw IllegalStateException("Correlation ID ikke satt")
 }
 
 private fun ApplicationResponse.getRequestId(): String? {

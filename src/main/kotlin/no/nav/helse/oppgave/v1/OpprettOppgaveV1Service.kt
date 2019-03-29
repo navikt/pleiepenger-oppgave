@@ -13,8 +13,6 @@ import no.nav.helse.dusseldorf.ktor.core.Violation
 import no.nav.helse.oppgave.*
 import no.nav.helse.oppgave.gateway.OppgaveGateway
 import no.nav.helse.oppgave.gateway.Prioritet
-import no.nav.helse.validering.Brudd
-import no.nav.helse.validering.Valideringsfeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
