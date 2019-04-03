@@ -45,7 +45,7 @@ class SparkelGateway(
                 customizeClient { setProxyRoutePlanner() }
             }
             install (Logging) {
-                sl4jLogger("pleiepenger-dokument")
+                sl4jLogger("sparkel")
             }
         }
     )

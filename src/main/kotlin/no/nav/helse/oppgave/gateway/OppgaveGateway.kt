@@ -40,7 +40,7 @@ class OppgaveGateway(
                 customizeClient { setProxyRoutePlanner() }
             }
             install (Logging) {
-                sl4jLogger("pleiepenger-oppgave")
+                sl4jLogger("oppgave")
             }
         }
     )
