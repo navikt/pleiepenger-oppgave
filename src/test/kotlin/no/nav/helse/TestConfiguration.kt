@@ -12,9 +12,10 @@ object TestConfiguration {
         sparkelBaseUrl : String? = wireMockServer?.getSparkelBaseUrl(),
         oppgaveBaseUrl : String? = wireMockServer?.getOppgaveBaseUrl(),
         issuer : String? = wireMockServer?.baseUrl(),
-        authorizedSystems : String? = wireMockServer?.getSubject()
+        authorizedSystems : String? = wireMockServer?.getSubject(),
+        clientSecret: String? = "foo"
     ) : Map<String, String>{
-        return mapOf(
+        val map = mutableMapOf(
             Pair("ktor.deployment.port","$port"),
             Pair("nav.authorization.token_url","$tokenUrl"),
             Pair("nav.authorization.jwks_url","$jwkSetUrl"),
@@ -23,6 +24,12 @@ object TestConfiguration {
             Pair("nav.sparkel.base_url", "$sparkelBaseUrl"),
             Pair("nav.oppgave.base_url", "$oppgaveBaseUrl")
         )
+
+        if (clientSecret != null) {
+            map["nav.authorization.service_account.client_secret"] = clientSecret
+        }
+
+        return map.toMap()
     }
 
     fun asArray(map : Map<String, String>) : Array<String>  {

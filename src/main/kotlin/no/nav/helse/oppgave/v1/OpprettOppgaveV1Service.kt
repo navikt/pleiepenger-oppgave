@@ -6,10 +6,7 @@ import no.nav.helse.CorrelationId
 import no.nav.helse.Tema
 import no.nav.helse.behandlendeenhet.BehandlendeEnhetService
 import no.nav.helse.behandlendeenhet.Enhet
-import no.nav.helse.dusseldorf.ktor.core.ParameterType
-import no.nav.helse.dusseldorf.ktor.core.Throwblem
-import no.nav.helse.dusseldorf.ktor.core.ValidationProblemDetails
-import no.nav.helse.dusseldorf.ktor.core.Violation
+import no.nav.helse.dusseldorf.ktor.core.*
 import no.nav.helse.oppgave.*
 import no.nav.helse.oppgave.gateway.OppgaveGateway
 import no.nav.helse.oppgave.gateway.Prioritet
@@ -25,22 +22,16 @@ private val behandlndeEnhetCounter = Counter.build()
     .register()
 
 private val logger: Logger = LoggerFactory.getLogger("nav.OpprettOppgaveV1Service")
-private val ONLY_DIGITS = Regex("\\d+")
 
 // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Applikasjoner
-private val GOSYS_FAGSYSTEM = FagSystem("GOSYS", "FS22")
 private val JOARK_FAGSYSTEM = FagSystem("JOARK", "AS36")
 private val INFOTRYGD_FAGSYSTEM = FagSystem("INFOTRYGD", "IT00")
 
 private val OMSORG_TEMA = Tema("OMS") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Tema
 private val PLEIEPENGER_SYKT_BARN_NY_ORDNING_BEHANDLINGS_TEMA = BehandlingsTema("ab0320") // Pleiepenger sykt barn ny ordning fom 011017 - https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstema
 
-private val DIGITAL_SOKNAD_BEHANDLIGNSTYPE = BehandlingsType("ae0227") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper TODO: Bruk denne når den er opprettet
-
-// https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Oppgavetyper
-private val BEHANDLE_SAK_OPPGAVE_TYPE = OppgaveType("BEH_SAK") // Om vi får automatisk journalføring er dette rett oppgavetype
-private val JOURNALFORING_OPPGAVE_TYPE = OppgaveType("JFR") // Så lenge vi ikke har automatisk journalføring er dette rett oppgavetype
-
+private val DIGITAL_SOKNAD_BEHANDLIGNSTYPE = BehandlingsType("ae0227") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
+private val JOURNALFORING_OPPGAVE_TYPE = OppgaveType("JFR") // Så lenge vi ikke har automatisk journalføring er dette rett oppgavetype - https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Oppgavetyper
 private val FAMILIE_TEMA_GRUPPE = TemaGruppe("FMLI") // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Temagrupper
 
 private val PRIORITET = Prioritet.NORM
@@ -93,7 +84,8 @@ class OpprettOppgaveV1Service(
             aktivDato = LocalDate.now(ZoneOffset.UTC),
             frist = DateUtils.nWeekdaysFromToday(FRIST_VIRKEDAGER),
             oppgaveType = JOURNALFORING_OPPGAVE_TYPE,
-            temaGruppe = FAMILIE_TEMA_GRUPPE
+            temaGruppe = FAMILIE_TEMA_GRUPPE,
+            behandlingsType = DIGITAL_SOKNAD_BEHANDLIGNSTYPE
         )
 
         logger.trace("Sender melding for å opprette oppgave")
@@ -110,13 +102,13 @@ class OpprettOppgaveV1Service(
 
     private fun validerMelding(melding: MeldingV1) {
         val violations = mutableListOf<Violation>()
-        if (!melding.soker.aktoerId.matches(ONLY_DIGITS)) {
+        if (!melding.soker.aktoerId.erKunSiffer()) {
             violations.add(Violation(parameterName = "soker.aktoer_id", reason = "Ugyldig AktørID. Kan kun være siffer.", invalidValue = melding.soker.aktoerId, parameterType = ParameterType.ENTITY))
         }
-        if (melding.barn.aktoerId != null && !melding.barn.aktoerId.matches(ONLY_DIGITS)) {
+        if (melding.barn.aktoerId != null && !melding.barn.aktoerId.erKunSiffer()) {
             violations.add(Violation(parameterName = "barn.aktoer_id", reason = "Ugyldig AktørID. Kan kun være siffer.", invalidValue = melding.barn.aktoerId, parameterType = ParameterType.ENTITY))
         }
-        if (!melding.journalPostId.matches(ONLY_DIGITS)) {
+        if (!melding.journalPostId.erKunSiffer()) {
             violations.add(Violation(parameterName = "journal_post_id", reason = "Ugyldig JournalpostID. Kan kun være siffer.", invalidValue = melding.journalPostId, parameterType = ParameterType.ENTITY))
         }
         if (violations.isNotEmpty()) {

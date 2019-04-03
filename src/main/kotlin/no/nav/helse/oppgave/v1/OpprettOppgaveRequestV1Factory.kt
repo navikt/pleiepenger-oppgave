@@ -23,7 +23,7 @@ object OpprettOppgaveRequestV1Factory {
         aktivDato: LocalDate,
         frist: LocalDate,
         oppgaveType: OppgaveType,
-        behandlingsType: BehandlingsType? = null
+        behandlingsType: BehandlingsType
     ) : OpprettOppgaveRequest {
         return OpprettOppgaveRequest(
             tildeltEnhetsnr = behandlendeEnhet.id,
@@ -38,7 +38,7 @@ object OpprettOppgaveRequestV1Factory {
             oppgavetype = oppgaveType.value,
             behandlingstema = behandlingsTema.value,
             temagruppe = temaGruppe.value,
-            behandlingstype = behandlingsType?.value
+            behandlingstype = behandlingsType.value
         )
     }
 }
