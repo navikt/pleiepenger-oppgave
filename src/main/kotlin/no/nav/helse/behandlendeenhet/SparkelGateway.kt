@@ -2,23 +2,18 @@ package no.nav.helse.behandlendeenhet
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.url
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.kittinunf.fuel.core.Headers
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpGet
 import io.ktor.http.Url
 import no.nav.helse.AktoerId
 import no.nav.helse.CorrelationId
 import no.nav.helse.Tema
 import no.nav.helse.dusseldorf.ktor.client.*
+import no.nav.helse.dusseldorf.ktor.metrics.Operation
+import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -29,31 +24,14 @@ private val logger: Logger = LoggerFactory.getLogger("nav.SparkelGateway")
 
 class SparkelGateway(
     baseUrl : URL,
-    private val systemCredentialsProvider: SystemCredentialsProvider) {
-
-    private val monitoredHttpClient = MonitoredHttpClient(
-        source = "pleiepenger-oppgave",
-        destination = "sparkel",
-        overridePaths = mapOf(
-            Pair(Regex("/api/arbeidsfordeling/behandlende-enhet/.*"), "/api/arbeidsfordeling/behandlende-enhet")
-        ),
-        httpClient = HttpClient(Apache) {
-            install(JsonFeature) {
-                serializer = JacksonSerializer { configureObjectMapper(this) }
-            }
-            engine {
-                customizeClient { setProxyRoutePlanner() }
-            }
-            install (Logging) {
-                sl4jLogger("sparkel")
-            }
-        }
-    )
+    private val accessTokenClient: CachedAccessTokenClient) {
 
     private val hentBehandlendeEnhetBaseUrl: URL = Url.buildURL(
         baseUrl = baseUrl,
         pathParts = listOf("api","arbeidsfordeling", "behandlende-enhet")
     )
+
+    private val objectMapper = configuredObjectMapper()
 
     suspend fun hentBehandlendeEnhet(
         hovedAktoer : AktoerId,
@@ -62,6 +40,8 @@ class SparkelGateway(
         correlationId: CorrelationId
     ) : Enhet {
 
+        val authorizationHeader = accessTokenClient.getAccessToken(setOf("openid")).asAuthoriationHeader()
+
         val url = Url.buildURL(
             baseUrl = hentBehandlendeEnhetBaseUrl,
             pathParts = listOf(hovedAktoer.value),
@@ -69,15 +49,28 @@ class SparkelGateway(
                 tema = tema,
                 medAktoerer = medAktoerer
             )
-        )
+        ).toString()
 
-        val httpRequest = HttpRequestBuilder()
-        httpRequest.header(HttpHeaders.Authorization, systemCredentialsProvider.getAuthorizationHeader())
-        httpRequest.header(SPARKEL_CORRELATION_ID_HEADER, correlationId.value)
-        httpRequest.method = HttpMethod.Get
-        httpRequest.accept(ContentType.Application.Json)
-        httpRequest.url(url)
-        return monitoredHttpClient.requestAndReceive(httpRequest)
+        val (_, _, result) =
+            Operation.monitored(
+                app = "pleiepenger-oppgave",
+                operation = "hente-behandlende-enhet",
+                resultResolver = { 200 == it.second.statusCode }
+            ) {
+                url.httpGet().header(
+                    Headers.ACCEPT to "application/json",
+                    SPARKEL_CORRELATION_ID_HEADER to correlationId.value,
+                    Headers.AUTHORIZATION to authorizationHeader
+                ).awaitStringResponseResult()
+            }
+
+        return result.fold(
+            { success -> objectMapper.readValue(success) },
+            { error ->
+                logger.error(error.toString())
+                throw IllegalStateException("Feil ved henting av behandlende enhet.")
+            }
+        )
     }
 
     private fun queryParameters(
@@ -88,14 +81,15 @@ class SparkelGateway(
         queryParameters.put("tema", listOf(tema.value))
 
         val akoerIdStringList = mutableListOf<String>()
-        medAktoerer.forEach { it ->
+        medAktoerer.forEach {
             akoerIdStringList.add(it.value)
         }
         queryParameters.put("medAktoerId", akoerIdStringList.toList())
         return queryParameters.toMap()
     }
 
-    private fun configureObjectMapper(objectMapper: ObjectMapper) : ObjectMapper {
+    private fun configuredObjectMapper() : ObjectMapper {
+        val objectMapper = jacksonObjectMapper()
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         return objectMapper
     }

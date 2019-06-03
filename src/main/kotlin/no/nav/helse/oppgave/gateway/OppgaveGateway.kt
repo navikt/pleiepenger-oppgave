@@ -4,17 +4,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.header
-import io.ktor.client.request.url
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.kittinunf.fuel.core.Headers
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpPost
 import io.ktor.http.*
 import no.nav.helse.CorrelationId
 import no.nav.helse.dusseldorf.ktor.client.*
+import no.nav.helse.dusseldorf.ktor.metrics.Operation
+import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -26,46 +25,46 @@ private val logger: Logger = LoggerFactory.getLogger("nav.OppgaveGateway")
  */
 class OppgaveGateway(
     oppgaveBaseUrl: URL,
-    private val systemCredentialsProvider: SystemCredentialsProvider
+    private val accessTokenClient: CachedAccessTokenClient
 ) {
 
-    private val monitoredHttpClient = MonitoredHttpClient(
-        source = "pleiepenger-oppgave",
-        destination = "oppgave",
-        httpClient = HttpClient(Apache) {
-            install(JsonFeature) {
-                serializer = JacksonSerializer { configureObjectMapper(this) }
-            }
-            engine {
-                customizeClient { setProxyRoutePlanner() }
-            }
-            install (Logging) {
-                sl4jLogger("oppgave")
-            }
-        }
-    )
-
-    private val opprettOppgaveUrl : URL = Url.buildURL(oppgaveBaseUrl, pathParts = listOf("api", "v1", "oppgaver"))
+    private val opprettOppgaveUrl = Url.buildURL(oppgaveBaseUrl, pathParts = listOf("api", "v1", "oppgaver")).toString()
+    private val objectMapper = configuredObjectMapper()
 
     suspend fun opprettOppgave(
         request : OpprettOppgaveRequest,
         correlationId : CorrelationId
     ) : OpprettOppgaveResponse {
-        val httpRequest = HttpRequestBuilder()
-        httpRequest.header(HttpHeaders.Authorization, systemCredentialsProvider.getAuthorizationHeader())
-        httpRequest.header(HttpHeaders.XCorrelationId, correlationId.value)
-        httpRequest.method = HttpMethod.Post
-        httpRequest.contentType(ContentType.Application.Json)
-        httpRequest.body = request
-        httpRequest.url(opprettOppgaveUrl)
 
-        return monitoredHttpClient.requestAndReceive(
-            httpRequestBuilder = httpRequest,
-            expectedHttpResponseCodes = setOf(HttpStatusCode.Created)
+        val authorizationHeader = accessTokenClient.getAccessToken(setOf("openid")).asAuthoriationHeader()
+        val body = configuredObjectMapper().writeValueAsString(request)
+
+        val (_,_, result) = Operation.monitored(
+            app = "pleiepenger-oppgave",
+            operation = "opprettet-oppgave",
+            resultResolver = { 201 == it.second.statusCode }
+        ) {
+            opprettOppgaveUrl.httpPost()
+                .body(body)
+                .header(
+                    Headers.CONTENT_TYPE to "application/json",
+                    Headers.ACCEPT to "application/json",
+                    HttpHeaders.XCorrelationId to correlationId.value,
+                    Headers.AUTHORIZATION to authorizationHeader
+                ).awaitStringResponseResult()
+        }
+
+        return result.fold(
+            { success -> objectMapper.readValue(success) },
+            { error ->
+                logger.error(error.toString())
+                throw IllegalStateException("Feil ved Opprettelse av oppgave")
+            }
         )
     }
 
-    private fun configureObjectMapper(objectMapper: ObjectMapper) : ObjectMapper {
+    private fun configuredObjectMapper() : ObjectMapper {
+        val objectMapper = jacksonObjectMapper()
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         objectMapper.registerModule(JavaTimeModule())

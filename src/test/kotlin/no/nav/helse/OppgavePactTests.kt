@@ -18,7 +18,8 @@ import org.junit.Test
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import no.nav.helse.dusseldorf.ktor.client.SystemCredentialsProvider
+import no.nav.helse.dusseldorf.oauth2.client.AccessToken
+import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -145,15 +146,18 @@ class OppgavePactTests {
     private fun oppgaveGateway(): OppgaveGateway {
         return OppgaveGateway(
             oppgaveBaseUrl = URL(mockProvider.url),
-            systemCredentialsProvider = mockSystemCredentialsProvider()
+            accessTokenClient = mockAccessTokenClient()
         )
     }
 
-    private fun mockSystemCredentialsProvider(): SystemCredentialsProvider {
-        val mock = mock<SystemCredentialsProvider>()
+    private fun mockAccessTokenClient(): CachedAccessTokenClient {
+        val mock = mock<CachedAccessTokenClient>()
         runBlocking {
-            whenever(mock.getAuthorizationHeader()).thenReturn(
-                "Bearer $jwt"
+            whenever(mock.getAccessToken(any())).thenReturn(
+                AccessToken(
+                    token = jwt,
+                    type = "Bearer"
+                )
             )
         }
         return mock

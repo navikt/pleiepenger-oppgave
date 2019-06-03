@@ -250,8 +250,16 @@ class PleiepengerOppgaveTest {
 
         requestAndAssert(
             request = request,
-            expectedCode = HttpStatusCode.Unauthorized,
-            expectedResponse = null,
+            expectedCode = HttpStatusCode.Forbidden,
+            expectedResponse = """
+            {
+                "type": "/problem-details/unauthorized",
+                "title": "unauthorized",
+                "status": 403,
+                "detail": "Requesten inneholder ikke tilstrekkelige tilganger.",
+                "instance": "about:blank"
+            }
+            """.trimIndent(),
             accessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), "srvnotauthorized")
         )
     }
