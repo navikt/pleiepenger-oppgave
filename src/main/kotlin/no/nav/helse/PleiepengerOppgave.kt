@@ -60,8 +60,6 @@ fun Application.pleiepengerOppgave() {
         AuthStatusPages()
     }
 
-    issuers.healthCheckMap()
-
     val naisStsClient = configuration.naisStsClient()
     val naisStsAccessTokenClient = NaisStsAccessTokenClient(
         clientId = naisStsClient.clientId(),
@@ -103,10 +101,10 @@ fun Application.pleiepengerOppgave() {
                     naisStsAccessTokenClient.getAccessToken(setOf("openid"))
                 },
                 HttpRequestHealthCheck(
-                    urlExpectedHttpStatusCodeMap = issuers.healthCheckMap().apply {
-                        Url.buildURL(baseUrl = configuration.getOppgaveBaseUrl(), pathParts = listOf("internal", "ready")) to HttpStatusCode.OK
+                    urlExpectedHttpStatusCodeMap = issuers.healthCheckMap(mutableMapOf(
+                        Url.buildURL(baseUrl = configuration.getOppgaveBaseUrl(), pathParts = listOf("internal", "ready")) to HttpStatusCode.OK,
                         Url.buildURL(baseUrl = configuration.getSparkelBaseUrl(), pathParts = listOf("isready")) to HttpStatusCode.OK
-                    }
+                    ))
                 )
             )
         )
@@ -126,10 +124,11 @@ fun Application.pleiepengerOppgave() {
     }
 }
 
-private fun Map<Issuer, Set<ClaimRule>>.healthCheckMap() : MutableMap<URL, HttpStatusCode> {
-    val healthCheckMap = mutableMapOf<URL, HttpStatusCode>()
+private fun Map<Issuer, Set<ClaimRule>>.healthCheckMap(
+    initial : MutableMap<URL, HttpStatusCode>
+) : Map<URL, HttpStatusCode> {
     forEach { issuer, _ ->
-        healthCheckMap[issuer.jwksUri()] = HttpStatusCode.OK
+        initial[issuer.jwksUri()] = HttpStatusCode.OK
     }
-    return healthCheckMap
+    return initial.toMap()
 }
