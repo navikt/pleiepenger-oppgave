@@ -29,7 +29,7 @@ import no.nav.helse.oppgave.v1.OpprettOppgaveV1Service
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
+import java.net.URI
 
 private val logger: Logger = LoggerFactory.getLogger("nav.PleiepengerOppgave")
 
@@ -118,6 +118,10 @@ fun Application.pleiepengerOppgave() {
         fromXCorrelationIdHeader()
     }
 
+    intercept(ApplicationCallPipeline.Monitoring) {
+        call.request.log()
+    }
+
     install(CallLogging) {
         correlationIdAndRequestIdInMdc()
         logRequests()
@@ -125,8 +129,8 @@ fun Application.pleiepengerOppgave() {
 }
 
 private fun Map<Issuer, Set<ClaimRule>>.healthCheckMap(
-    initial : MutableMap<URL, HttpStatusCode>
-) : Map<URL, HttpStatusCode> {
+    initial : MutableMap<URI, HttpStatusCode>
+) : Map<URI, HttpStatusCode> {
     forEach { issuer, _ ->
         initial[issuer.jwksUri()] = HttpStatusCode.OK
     }

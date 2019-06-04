@@ -9,14 +9,14 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenResponse
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
+import java.net.URI
 import java.util.*
 import kotlin.IllegalStateException
 
 private val logger: Logger = LoggerFactory.getLogger("nav.NaisStsAccessTokenClient")
 
 internal class NaisStsAccessTokenClient(
-    tokenEndpoint: URL,
+    tokenEndpoint: URI,
     clientId: String,
     clientSecret: String
 ) : AccessTokenClient {

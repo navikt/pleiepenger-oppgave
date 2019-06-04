@@ -5,7 +5,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.dusseldorf.ktor.auth.*
 import no.nav.helse.dusseldorf.ktor.core.getOptionalList
 import no.nav.helse.dusseldorf.ktor.core.getRequiredString
-import java.net.URL
+import java.net.URI
 
 private const val NAIS_STS_ALIAS = "nais-sts"
 
@@ -21,12 +21,12 @@ data class Configuration(private val config : ApplicationConfig) {
         )
     }
 
-    fun getOppgaveBaseUrl() : URL {
-        return URL(config.getRequiredString("nav.oppgave.base_url", secret = false))
+    fun getOppgaveBaseUrl() : URI {
+        return URI(config.getRequiredString("nav.oppgave.base_url", secret = false))
     }
 
-    fun getSparkelBaseUrl() : URL {
-        return URL(config.getRequiredString("nav.sparkel.base_url", secret = false))
+    fun getSparkelBaseUrl() : URI {
+        return URI(config.getRequiredString("nav.sparkel.base_url", secret = false))
     }
 
     fun issuers(): Map<Issuer, Set<ClaimRule>> {

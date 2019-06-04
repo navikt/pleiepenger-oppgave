@@ -23,7 +23,7 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
+import java.net.URI
 import java.time.Duration
 import java.util.*
 import kotlin.test.assertEquals
@@ -145,7 +145,7 @@ class OppgavePactTests {
 
     private fun oppgaveGateway(): OppgaveGateway {
         return OppgaveGateway(
-            oppgaveBaseUrl = URL(mockProvider.url),
+            oppgaveBaseUrl = URI(mockProvider.url),
             accessTokenClient = mockAccessTokenClient()
         )
     }

@@ -16,7 +16,7 @@ import no.nav.helse.dusseldorf.ktor.metrics.Operation
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
+import java.net.URI
 
 private val logger: Logger = LoggerFactory.getLogger("nav.OppgaveGateway")
 
@@ -24,7 +24,7 @@ private val logger: Logger = LoggerFactory.getLogger("nav.OppgaveGateway")
     https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
  */
 class OppgaveGateway(
-    oppgaveBaseUrl: URL,
+    oppgaveBaseUrl: URI,
     private val accessTokenClient: CachedAccessTokenClient
 ) {
 

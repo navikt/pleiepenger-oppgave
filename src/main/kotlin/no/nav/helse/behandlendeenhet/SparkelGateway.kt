@@ -16,17 +16,17 @@ import no.nav.helse.dusseldorf.ktor.metrics.Operation
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
+import java.net.URI
 
 private const val SPARKEL_CORRELATION_ID_HEADER = "Nav-Call-Id"
 
 private val logger: Logger = LoggerFactory.getLogger("nav.SparkelGateway")
 
 class SparkelGateway(
-    baseUrl : URL,
+    baseUrl : URI,
     private val accessTokenClient: CachedAccessTokenClient) {
 
-    private val hentBehandlendeEnhetBaseUrl: URL = Url.buildURL(
+    private val hentBehandlendeEnhetBaseUrl = Url.buildURL(
         baseUrl = baseUrl,
         pathParts = listOf("api","arbeidsfordeling", "behandlende-enhet")
     )
