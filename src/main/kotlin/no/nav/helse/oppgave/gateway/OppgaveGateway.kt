@@ -16,6 +16,7 @@ import no.nav.helse.dusseldorf.ktor.metrics.Operation
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
 import java.net.URI
 
 private val logger: Logger = LoggerFactory.getLogger("nav.OppgaveGateway")
@@ -37,21 +38,24 @@ class OppgaveGateway(
     ) : OpprettOppgaveResponse {
 
         val authorizationHeader = accessTokenClient.getAccessToken(setOf("openid")).asAuthoriationHeader()
-        val body = configuredObjectMapper().writeValueAsString(request)
+        val body = configuredObjectMapper().writeValueAsBytes(request)
+        val contentStream = { ByteArrayInputStream(body) }
+
+        val httpRequest = opprettOppgaveUrl.httpPost()
+            .body(contentStream)
+            .header(
+                Headers.CONTENT_TYPE to "application/json",
+                Headers.ACCEPT to "application/json",
+                HttpHeaders.XCorrelationId to correlationId.value,
+                Headers.AUTHORIZATION to authorizationHeader
+            )
 
         val (_,_, result) = Operation.monitored(
             app = "pleiepenger-oppgave",
             operation = "opprettet-oppgave",
             resultResolver = { 201 == it.second.statusCode }
         ) {
-            opprettOppgaveUrl.httpPost()
-                .body(body)
-                .header(
-                    Headers.CONTENT_TYPE to "application/json",
-                    Headers.ACCEPT to "application/json",
-                    HttpHeaders.XCorrelationId to correlationId.value,
-                    Headers.AUTHORIZATION to authorizationHeader
-                ).awaitStringResponseResult()
+            httpRequest.awaitStringResponseResult()
         }
 
         return result.fold(

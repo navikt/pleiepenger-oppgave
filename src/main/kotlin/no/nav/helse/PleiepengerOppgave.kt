@@ -17,6 +17,7 @@ import no.nav.helse.dusseldorf.ktor.auth.*
 import no.nav.helse.dusseldorf.ktor.client.*
 import no.nav.helse.dusseldorf.ktor.core.*
 import no.nav.helse.dusseldorf.ktor.health.HealthRoute
+import no.nav.helse.dusseldorf.ktor.health.HealthService
 import no.nav.helse.dusseldorf.ktor.health.TryCatchHealthCheck
 import no.nav.helse.dusseldorf.ktor.jackson.JacksonStatusPages
 import no.nav.helse.dusseldorf.ktor.jackson.dusseldorfConfigured
@@ -94,17 +95,17 @@ fun Application.pleiepengerOppgave() {
         DefaultProbeRoutes()
         MetricsRoute()
         HealthRoute(
-            healthChecks = setOf(
-                TryCatchHealthCheck(
-                    name = "NaisStsAccessTokenHealthCheck"
-                ) {
-                    naisStsAccessTokenClient.getAccessToken(setOf("openid"))
-                },
-                HttpRequestHealthCheck(
-                    urlExpectedHttpStatusCodeMap = issuers.healthCheckMap(mutableMapOf(
-                        Url.buildURL(baseUrl = configuration.getOppgaveBaseUrl(), pathParts = listOf("internal", "ready")) to HttpStatusCode.OK,
-                        Url.buildURL(baseUrl = configuration.getSparkelBaseUrl(), pathParts = listOf("isready")) to HttpStatusCode.OK
-                    ))
+            healthService = HealthService(
+                healthChecks = setOf(
+                    TryCatchHealthCheck(name = "NaisStsAccessTokenHealthCheck") {
+                        naisStsAccessTokenClient.getAccessToken(setOf("openid"))
+                    },
+                    HttpRequestHealthCheck(
+                        issuers.healthCheckMap(mutableMapOf(
+                            Url.buildURL(baseUrl = configuration.getOppgaveBaseUrl(), pathParts = listOf("internal", "ready")) to HttpRequestHealthConfig(expectedStatus = HttpStatusCode.OK),
+                            Url.buildURL(baseUrl = configuration.getSparkelBaseUrl(), pathParts = listOf("isready")) to HttpRequestHealthConfig(expectedStatus = HttpStatusCode.OK)
+                        ))
+                    )
                 )
             )
         )
@@ -129,10 +130,10 @@ fun Application.pleiepengerOppgave() {
 }
 
 private fun Map<Issuer, Set<ClaimRule>>.healthCheckMap(
-    initial : MutableMap<URI, HttpStatusCode>
-) : Map<URI, HttpStatusCode> {
+    initial : MutableMap<URI, HttpRequestHealthConfig>
+) : Map<URI, HttpRequestHealthConfig> {
     forEach { issuer, _ ->
-        initial[issuer.jwksUri()] = HttpStatusCode.OK
+        initial[issuer.jwksUri()] = HttpRequestHealthConfig(expectedStatus = HttpStatusCode.OK, includeExpectedStatusEntity = false)
     }
     return initial.toMap()
 }

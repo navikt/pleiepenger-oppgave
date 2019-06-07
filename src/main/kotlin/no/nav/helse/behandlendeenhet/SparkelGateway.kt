@@ -51,17 +51,19 @@ class SparkelGateway(
             )
         ).toString()
 
+        val httpRequest = url.httpGet().header(
+            Headers.ACCEPT to "application/json",
+            SPARKEL_CORRELATION_ID_HEADER to correlationId.value,
+            Headers.AUTHORIZATION to authorizationHeader
+        )
+
         val (_, _, result) =
             Operation.monitored(
                 app = "pleiepenger-oppgave",
                 operation = "hente-behandlende-enhet",
                 resultResolver = { 200 == it.second.statusCode }
             ) {
-                url.httpGet().header(
-                    Headers.ACCEPT to "application/json",
-                    SPARKEL_CORRELATION_ID_HEADER to correlationId.value,
-                    Headers.AUTHORIZATION to authorizationHeader
-                ).awaitStringResponseResult()
+                httpRequest.awaitStringResponseResult()
             }
 
         return result.fold(
