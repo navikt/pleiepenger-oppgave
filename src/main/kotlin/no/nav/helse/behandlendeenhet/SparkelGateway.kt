@@ -62,28 +62,25 @@ class SparkelGateway(
             Headers.AUTHORIZATION to authorizationHeader
         )
 
-        val (request, _, result) = Retry.retry(
+        return Retry.retry(
             operation = HENTE_BEHANDLENDE_ENHET_OPERATION,
             initialDelay = Duration.ofMillis(200),
             factor = 2.0
         ) {
-            Operation.monitored(
+            val (request, _, result) = Operation.monitored(
                 app = "pleiepenger-oppgave",
                 operation = HENTE_BEHANDLENDE_ENHET_OPERATION,
                 resultResolver = { 200 == it.second.statusCode }
-            ) {
-                httpRequest.awaitStringResponseResult()
-            }
+            ) { httpRequest.awaitStringResponseResult() }
+            result.fold(
+                { success -> objectMapper.readValue<Enhet>(success) },
+                { error ->
+                    logger.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'")
+                    logger.error(error.toString())
+                    throw IllegalStateException("Feil ved henting av behandlende enhet.")
+                }
+            )
         }
-
-        return result.fold(
-            { success -> objectMapper.readValue(success) },
-            { error ->
-                logger.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'")
-                logger.error(error.toString())
-                throw IllegalStateException("Feil ved henting av behandlende enhet.")
-            }
-        )
     }
 
     private fun queryParameters(
