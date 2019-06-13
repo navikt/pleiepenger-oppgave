@@ -13,13 +13,16 @@ import java.net.URI
 import java.util.*
 import kotlin.IllegalStateException
 
-private val logger: Logger = LoggerFactory.getLogger("nav.NaisStsAccessTokenClient")
 
 internal class NaisStsAccessTokenClient(
     tokenEndpoint: URI,
     clientId: String,
     clientSecret: String
 ) : AccessTokenClient {
+
+    private companion object {
+        private val logger: Logger = LoggerFactory.getLogger("nav.NaisStsAccessTokenClient")
+    }
 
     private val authorizationHeader = getAuthorizationHeader(clientId, clientSecret)
     private val url = Url.buildURL(baseUrl = tokenEndpoint, queryParameters = mapOf(
@@ -28,7 +31,7 @@ internal class NaisStsAccessTokenClient(
     )).toString()
 
     override fun getAccessToken(scopes: Set<String>): AccessTokenResponse {
-        val (_, _, result) = url.httpGet()
+        val (request, _, result) = url.httpGet()
             .header(
                 Headers.AUTHORIZATION to authorizationHeader
             ).responseString()
@@ -43,6 +46,7 @@ internal class NaisStsAccessTokenClient(
                 )
             },
             { error ->
+                logger.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'")
                 logger.error(error.toString())
                 throw IllegalStateException("Feil ved henting av access token fra Nais STS.")
             }

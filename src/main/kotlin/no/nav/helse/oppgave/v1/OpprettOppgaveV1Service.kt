@@ -91,7 +91,7 @@ class OpprettOppgaveV1Service(
         logger.trace("Sender melding for å opprette oppgave")
 
         val response = oppgaveGateway.opprettOppgave(
-            request = request,
+            opprettOppgaveRequest = request,
             correlationId = correlationId
         )
 

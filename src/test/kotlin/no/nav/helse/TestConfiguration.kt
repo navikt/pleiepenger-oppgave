@@ -22,7 +22,6 @@ object TestConfiguration {
             Pair("nav.auth.issuers.0.jwks_uri","$jwkSetUrl"),
             Pair("nav.auth.clients.0.alias", "nais-sts"),
             Pair("nav.auth.clients.0.client_id", "srvpleiepenger-opp"),
-            Pair("nav.auth.clients.0.client_secret", "srvpleiepenger-opp"),
             Pair("nav.auth.clients.0.token_endpoint", "$tokenUrl"),
             Pair("nav.rest_api.authorized_systems","$authorizedSystems"),
             Pair("nav.sparkel.base_url", "$sparkelBaseUrl"),

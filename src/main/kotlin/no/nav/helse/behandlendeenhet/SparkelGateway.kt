@@ -12,19 +12,24 @@ import no.nav.helse.AktoerId
 import no.nav.helse.CorrelationId
 import no.nav.helse.Tema
 import no.nav.helse.dusseldorf.ktor.client.*
+import no.nav.helse.dusseldorf.ktor.core.Retry
 import no.nav.helse.dusseldorf.ktor.metrics.Operation
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.time.Duration
 
-private const val SPARKEL_CORRELATION_ID_HEADER = "Nav-Call-Id"
-
-private val logger: Logger = LoggerFactory.getLogger("nav.SparkelGateway")
 
 class SparkelGateway(
     baseUrl : URI,
     private val accessTokenClient: CachedAccessTokenClient) {
+
+    private companion object {
+        private const val SPARKEL_CORRELATION_ID_HEADER = "Nav-Call-Id"
+        private const val HENTE_BEHANDLENDE_ENHET_OPERATION = "hente-behandlende-enhet"
+        private val logger: Logger = LoggerFactory.getLogger("nav.SparkelGateway")
+    }
 
     private val hentBehandlendeEnhetBaseUrl = Url.buildURL(
         baseUrl = baseUrl,
@@ -57,18 +62,24 @@ class SparkelGateway(
             Headers.AUTHORIZATION to authorizationHeader
         )
 
-        val (_, _, result) =
+        val (request, _, result) = Retry.retry(
+            operation = HENTE_BEHANDLENDE_ENHET_OPERATION,
+            initialDelay = Duration.ofMillis(200),
+            factor = 2.0
+        ) {
             Operation.monitored(
                 app = "pleiepenger-oppgave",
-                operation = "hente-behandlende-enhet",
+                operation = HENTE_BEHANDLENDE_ENHET_OPERATION,
                 resultResolver = { 200 == it.second.statusCode }
             ) {
                 httpRequest.awaitStringResponseResult()
             }
+        }
 
         return result.fold(
             { success -> objectMapper.readValue(success) },
             { error ->
+                logger.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'")
                 logger.error(error.toString())
                 throw IllegalStateException("Feil ved henting av behandlende enhet.")
             }

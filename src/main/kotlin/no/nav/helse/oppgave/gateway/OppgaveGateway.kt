@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.net.URI
 
-private val logger: Logger = LoggerFactory.getLogger("nav.OppgaveGateway")
-
 /*
     https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
  */
@@ -29,16 +27,20 @@ class OppgaveGateway(
     private val accessTokenClient: CachedAccessTokenClient
 ) {
 
+    private companion object {
+        private val logger: Logger = LoggerFactory.getLogger("nav.OppgaveGateway")
+    }
+
     private val opprettOppgaveUrl = Url.buildURL(oppgaveBaseUrl, pathParts = listOf("api", "v1", "oppgaver")).toString()
     private val objectMapper = configuredObjectMapper()
 
     suspend fun opprettOppgave(
-        request : OpprettOppgaveRequest,
+        opprettOppgaveRequest : OpprettOppgaveRequest,
         correlationId : CorrelationId
     ) : OpprettOppgaveResponse {
 
         val authorizationHeader = accessTokenClient.getAccessToken(setOf("openid")).asAuthoriationHeader()
-        val body = configuredObjectMapper().writeValueAsBytes(request)
+        val body = configuredObjectMapper().writeValueAsBytes(opprettOppgaveRequest)
         val contentStream = { ByteArrayInputStream(body) }
 
         val httpRequest = opprettOppgaveUrl.httpPost()
@@ -50,7 +52,7 @@ class OppgaveGateway(
                 Headers.AUTHORIZATION to authorizationHeader
             )
 
-        val (_,_, result) = Operation.monitored(
+        val (request,_, result) = Operation.monitored(
             app = "pleiepenger-oppgave",
             operation = "opprettet-oppgave",
             resultResolver = { 201 == it.second.statusCode }
@@ -61,6 +63,7 @@ class OppgaveGateway(
         return result.fold(
             { success -> objectMapper.readValue(success) },
             { error ->
+                logger.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'")
                 logger.error(error.toString())
                 throw IllegalStateException("Feil ved Opprettelse av oppgave")
             }
