@@ -37,6 +37,22 @@ workflows:
           team: dusseldorf
           filters:
             branches:
+              only:
+                - master
+                - /dev-.*/
+          requires:
+            - build
+      - nais/deploy:
+          name: prod-deploy
+          build-and-push-docker-image: false
+          repo: navikt/pleiepenger-oppgave
+          image: navikt/pleiepenger-oppgave
+          github-app-id: 35124
+          nais-template: nais/prod-fss.yml
+          environment: prod-fss
+          team: dusseldorf
+          filters:
+            branches:
               only: master
           requires:
             - build
