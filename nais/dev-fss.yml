@@ -1,0 +1,58 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: pleiepenger-oppgave
+  namespace: default
+  labels:
+    team: {{team}}
+spec:
+  image: {{version}}
+  port: 8080
+  liveness:
+    path: isalive
+    initialDelay: 20
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: isready
+    initialDelay: 20
+    timeout: 1
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  ingresses:
+    - https://pleiepenger-oppgave.nais.preprod.local
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 90
+  prometheus:
+    enabled: true
+    path: /metrics
+  vault:
+    enabled: true
+  webproxy: true
+  env:
+    - name: OPPGAVE_BASE_URL
+      value: https://oppgave.nais.preprod.local
+    - name: SPARKEL_BASE_URL
+      value: https://sparkel.nais.preprod.local
+    - name: TOKEN_URL
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
+    - name: JWKS_URL
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/jwks
+    - name: ISSUER
+      value: https://security-token-service.nais.preprod.local
+    - name: AZURE_V1_DISCOVERY_ENDPOINT
+      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
+    - name: AZURE_V2_DISCOVERY_ENDPOINT
+      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
+    - name: AZURE_CLIENT_ID
+      value: 4bd971d8-2469-434f-9322-8cfe7a7a3379
+    - name: AZURE_AUTHORIZED_CLIENTS
+      value: a6aef297-b9c9-4cac-82be-060d4fa68bb8
