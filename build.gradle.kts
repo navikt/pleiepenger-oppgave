@@ -29,8 +29,7 @@ dependencies {
     compile ( "no.nav.helse:dusseldorf-oauth2-client:$dusseldorfKtorVersion")
 
     // Test
-    compile ( "no.nav.helse:dusseldorf-ktor-test-support:$dusseldorfKtorVersion")
-    testCompile("no.nav.security:oidc-test-support:0.2.18")
+    testCompile ( "no.nav.helse:dusseldorf-ktor-test-support:$dusseldorfKtorVersion")
     testCompile("io.ktor:ktor-server-test-host:$ktorVersion") {
         exclude(group = "org.eclipse.jetty")
     }

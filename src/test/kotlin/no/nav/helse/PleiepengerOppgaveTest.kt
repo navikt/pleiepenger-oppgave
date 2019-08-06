@@ -26,13 +26,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.test.*
 
-private val logger: Logger = LoggerFactory.getLogger("nav.PleiepengerOppgaveTest")
 
 @KtorExperimentalAPI
 class PleiepengerOppgaveTest {
 
     @KtorExperimentalAPI
     private companion object {
+
+        private val logger: Logger = LoggerFactory.getLogger(PleiepengerOppgaveTest::class.java)
 
         private val wireMockServer: WireMockServer = WireMockBuilder()
             .withAzureSupport()
