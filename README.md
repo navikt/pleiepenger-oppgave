@@ -1,5 +1,7 @@
 # pleiepenger-oppgave
 
+[![CircleCI](https://circleci.com/gh/navikt/pleiepenger-oppgave/tree/master.svg?style=svg)](https://circleci.com/gh/navikt/pleiepenger-oppgave/tree/master)
+
 Inneholder integrasjon mot oppgave for å opprette en gosys-oppgave i forbindelse med søknad om Pleiepenger.
 
 ## Versjon 1
@@ -28,6 +30,7 @@ Request ID blir ikke propagert videre, og skal ha sitt opphav hos konsumenten
 - Request ID kan sendes som heder 'X-Request-ID'
 - Versjon på meldingen avledes fra pathen '/v1/oppgave' -> 1
 
+## Henvendelser
+Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
-## For NAV-ansatte
-Interne henvendelser kan sendes via Slack i kanalen #team-düsseldorf
+Interne henvendelser kan sendes via Slack i kanalen #team-düsseldorf.
