@@ -10,13 +10,8 @@ object TestConfiguration {
     fun asMap(
         wireMockServer: WireMockServer? = null,
         port : Int = 8080,
-        jwkSetUrl : String? = wireMockServer?.getJwksUrl(),
-        tokenUrl : String? = wireMockServer?.getTokenUrl(),
         sparkelBaseUrl : String? = wireMockServer?.getSparkelBaseUrl(),
         oppgaveBaseUrl : String? = wireMockServer?.getOppgaveBaseUrl(),
-        issuer : String? = wireMockServer?.baseUrl(),
-        authorizedSystems : String? = wireMockServer?.getSubject(),
-        clientSecret: String? = "foo",
         naisStsAuthoriedClients: Set<String> = setOf("srvpps-prosessering")
     ) : Map<String, String> {
         val map = mutableMapOf(
@@ -24,10 +19,6 @@ object TestConfiguration {
             Pair("nav.sparkel.base_url", "$sparkelBaseUrl"),
             Pair("nav.oppgave.base_url", "$oppgaveBaseUrl")
         )
-
-        if (clientSecret != null) {
-            map["nav.auth.clients.0.client_secret"] = clientSecret
-        }
 
         // Clients
         if (wireMockServer != null) {
@@ -63,13 +54,5 @@ object TestConfiguration {
 //        }
 
         return map.toMap()
-    }
-
-    fun asArray(map : Map<String, String>) : Array<String>  {
-        val list = mutableListOf<String>()
-        map.forEach { configKey, configValue ->
-            list.add("-P:$configKey=$configValue")
-        }
-        return list.toTypedArray()
     }
 }

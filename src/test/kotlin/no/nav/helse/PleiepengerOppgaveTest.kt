@@ -85,13 +85,13 @@ class PleiepengerOppgaveTest {
             journalPostId = "13141516"
         )
 
-        WiremockWrapper.stubSparkelGetBehandlendeEnhetKunHovedSoeker(
+        stubSparkelGetBehandlendeEnhetKunHovedSoeker(
             sokerAktoerId = sokerAktoerId,
             enhetId = "1234",
             enhetNavn = "Follo"
         )
 
-        WiremockWrapper.stubOppgaveOk(
+        stubOppgaveOk(
             oppgaveId = oppgaveId,
             sokerAktoerId = sokerAktoerId
         )
@@ -119,14 +119,14 @@ class PleiepengerOppgaveTest {
             journalPostId = "131415161"
         )
 
-        WiremockWrapper.stubSparkelGetBehandlendeEnhetHovedSoekerOgMedSoeker(
+        stubSparkelGetBehandlendeEnhetHovedSoekerOgMedSoeker(
             sokerAktoerId = sokerAktoerId,
             medSoekerId = barnAktoerId,
             enhetId = "5678",
             enhetNavn = "VIKEN"
         )
 
-        WiremockWrapper.stubOppgaveOk(
+        stubOppgaveOk(
             oppgaveId = oppgaveId,
             sokerAktoerId = sokerAktoerId
         )
