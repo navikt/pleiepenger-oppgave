@@ -13,29 +13,29 @@ private const val NAIS_STS_ALIAS = "nais-sts"
 data class Configuration(private val config : ApplicationConfig) {
     private val clients = config.clients()
 
-    private fun getAuthorizedSystemsForRestApi(): List<String> {
+    private fun getNaisStsAuthorizedClients(): List<String> {
         return config.getOptionalList(
-            key = "nav.rest_api.authorized_systems",
-            builder = { value -> value},
+            key = "nav.auth.nais-sts.authorized_clients",
+            builder = { value -> value },
             secret = false
         )
     }
 
-    fun getOppgaveBaseUrl() : URI {
+    internal fun getOppgaveBaseUrl() : URI {
         return URI(config.getRequiredString("nav.oppgave.base_url", secret = false))
     }
 
-    fun getSparkelBaseUrl() : URI {
+    internal fun getSparkelBaseUrl() : URI {
         return URI(config.getRequiredString("nav.sparkel.base_url", secret = false))
     }
 
-    fun issuers(): Map<Issuer, Set<ClaimRule>> {
+    internal fun issuers(): Map<Issuer, Set<ClaimRule>> {
         return config.issuers().withAdditionalClaimRules(
-            mapOf(NAIS_STS_ALIAS to setOf(StandardClaimRules.Companion.EnforceSubjectOneOf(getAuthorizedSystemsForRestApi().toSet())))
+            mapOf(NAIS_STS_ALIAS to setOf(StandardClaimRules.Companion.EnforceSubjectOneOf(getNaisStsAuthorizedClients().toSet())))
         )
     }
 
-    fun naisStsClient() : ClientSecretClient  {
+    internal fun naisStsClient() : ClientSecretClient  {
         val client = clients.getOrElse(NAIS_STS_ALIAS) {
             throw IllegalStateException("Client[$NAIS_STS_ALIAS] må være satt opp.")
         }

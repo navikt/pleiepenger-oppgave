@@ -15,9 +15,8 @@ import no.nav.helse.oppgave.gateway.OppgaveGateway
 import no.nav.helse.oppgave.v1.*
 import org.junit.Rule
 import org.junit.Test
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.helse.dusseldorf.oauth2.client.AccessToken
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 
@@ -36,8 +35,6 @@ private const val barnaAktoerId = "1831212532190"
 private const val journalpostId = "137662692"
 private const val enhetsNummer = "4132"
 private const val oppgaveId = "58487564"
-
-
 
 private val aktivDato = Date(1553249225316)
 private val fristFerdigstillelse = Date(aktivDato.time + (Duration.ofDays(3).toMillis()))
@@ -151,28 +148,28 @@ class OppgavePactTests {
     }
 
     private fun mockAccessTokenClient(): CachedAccessTokenClient {
-        val mock = mock<CachedAccessTokenClient>()
-        runBlocking {
-            whenever(mock.getAccessToken(any())).thenReturn(
-                AccessToken(
-                    token = jwt,
-                    type = "Bearer"
-                )
+        val mock = mockk<CachedAccessTokenClient>()
+
+        every { runBlocking{ mock.getAccessToken(any()) } }.answers{
+            AccessToken(
+                token = jwt,
+                type = "Bearer"
             )
         }
+
         return mock
     }
 
     private fun mockSparkelGateway() : SparkelGateway {
-        val mock = mock<SparkelGateway>()
-        runBlocking {
-            whenever(mock.hentBehandlendeEnhet(any(), any(), any(), any())).thenReturn(
-                Enhet(
-                    id = enhetsNummer,
-                    navn = "Follo"
-                )
+        val mock = mockk<SparkelGateway>()
+
+        every { runBlocking{ mock.hentBehandlendeEnhet(any(), any(), any(), any()) } }.answers{
+            Enhet(
+                id = enhetsNummer,
+                navn = "Follo"
             )
         }
+
         return mock
     }
 }

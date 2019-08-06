@@ -14,6 +14,9 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.dusseldorf.ktor.jackson.dusseldorfConfigured
+import no.nav.helse.dusseldorf.ktor.testsupport.jws.Azure
+import no.nav.helse.dusseldorf.ktor.testsupport.jws.NaisSts
+import no.nav.helse.dusseldorf.ktor.testsupport.wiremock.WireMockBuilder
 import no.nav.helse.oppgave.v1.Barn
 import no.nav.helse.oppgave.v1.MeldingV1
 import no.nav.helse.oppgave.v1.Soker
@@ -24,7 +27,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.test.*
 
-private val logger: Logger = LoggerFactory.getLogger("nav.PleiepengerOppgaveTest")
 
 @KtorExperimentalAPI
 class PleiepengerOppgaveTest {
@@ -32,14 +34,26 @@ class PleiepengerOppgaveTest {
     @KtorExperimentalAPI
     private companion object {
 
-        private val wireMockServer: WireMockServer = WiremockWrapper.bootstrap()
+        private val logger: Logger = LoggerFactory.getLogger(PleiepengerOppgaveTest::class.java)
+
+        private val wireMockServer: WireMockServer = WireMockBuilder()
+            .withAzureSupport()
+            .withNaisStsSupport()
+            .build()
+            .stubSparkelReady()
+            .stubOppgaveReady()
+
         private val objectMapper = jacksonObjectMapper().dusseldorfConfigured()
-        private val authorizedAccessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), wireMockServer.getSubject())
+        private val authorizedAccessToken = NaisSts.generateJwt(application= "srvpps-prosessering")
 
 
         fun getConfig() : ApplicationConfig {
             val fileConfig = ConfigFactory.load()
-            val testConfig = ConfigFactory.parseMap(TestConfiguration.asMap(wireMockServer = wireMockServer))
+            val testConfig = ConfigFactory.parseMap(TestConfiguration.asMap(
+                wireMockServer = wireMockServer,
+                pleiepengerOppgaveAzureClientId = "pleiepenger-oppgave",
+                azureAuthorizedClients = setOf("pleiepengesoknad-prosessering")
+            ))
             val mergedConfig = testConfig.withFallback(fileConfig)
 
             return HoconApplicationConfig(mergedConfig)
@@ -77,13 +91,13 @@ class PleiepengerOppgaveTest {
             journalPostId = "13141516"
         )
 
-        WiremockWrapper.stubSparkelGetBehandlendeEnhetKunHovedSoeker(
+        stubSparkelGetBehandlendeEnhetKunHovedSoeker(
             sokerAktoerId = sokerAktoerId,
             enhetId = "1234",
             enhetNavn = "Follo"
         )
 
-        WiremockWrapper.stubOppgaveOk(
+        stubOppgaveOk(
             oppgaveId = oppgaveId,
             sokerAktoerId = sokerAktoerId
         )
@@ -100,7 +114,13 @@ class PleiepengerOppgaveTest {
     }
 
     @Test
-    fun `gyldig melding med aktoerID paa barn foerer til en opprettet oppgave med oppgaveID`() {
+    fun `gyldig medling med aktoer ID paa barn foerer til en opprettet oppgave med oppgaveID`() {
+        gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(authorizedAccessToken)
+        gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(Azure.V1_0.generateJwt(clientId = "pleiepengesoknad-prosessering", audience = "pleiepenger-oppgave"))
+        gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(Azure.V2_0.generateJwt(clientId = "pleiepengesoknad-prosessering", audience = "pleiepenger-oppgave"))
+    }
+
+    private fun gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(accessToken: String) {
         val sokerAktoerId = "7894561"
         val barnAktoerId = "997788"
         val oppgaveId = "4561231"
@@ -111,19 +131,20 @@ class PleiepengerOppgaveTest {
             journalPostId = "131415161"
         )
 
-        WiremockWrapper.stubSparkelGetBehandlendeEnhetHovedSoekerOgMedSoeker(
+        stubSparkelGetBehandlendeEnhetHovedSoekerOgMedSoeker(
             sokerAktoerId = sokerAktoerId,
             medSoekerId = barnAktoerId,
             enhetId = "5678",
             enhetNavn = "VIKEN"
         )
 
-        WiremockWrapper.stubOppgaveOk(
+        stubOppgaveOk(
             oppgaveId = oppgaveId,
             sokerAktoerId = sokerAktoerId
         )
 
         requestAndAssert(
+            accessToken = accessToken,
             request = request,
             expectedResponse = """
                 {
@@ -260,7 +281,7 @@ class PleiepengerOppgaveTest {
                 "instance": "about:blank"
             }
             """.trimIndent(),
-            accessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), "srvnotauthorized")
+            accessToken = NaisSts.generateJwt(application = "srvnotauthorized")
         )
     }
 
