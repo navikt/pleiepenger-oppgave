@@ -41,9 +41,5 @@ spec:
       value: https://oppgave.nais.adeo.no
     - name: SPARKEL_BASE_URL
       value: https://sparkel.nais.adeo.no
-    - name: TOKEN_URL
-      value: http://security-token-service/rest/v1/sts/token
-    - name: JWKS_URL
-      value: http://security-token-service/rest/v1/sts/jwks
-    - name: ISSUER
-      value: https://security-token-service.nais.adeo.no
+    - name: NAIS_STS_DISCOVERY_ENDPOINT
+      value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration

@@ -14,6 +14,8 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.dusseldorf.ktor.jackson.dusseldorfConfigured
+import no.nav.helse.dusseldorf.ktor.testsupport.jws.NaisSts
+import no.nav.helse.dusseldorf.ktor.testsupport.wiremock.WireMockBuilder
 import no.nav.helse.oppgave.v1.Barn
 import no.nav.helse.oppgave.v1.MeldingV1
 import no.nav.helse.oppgave.v1.Soker
@@ -32,9 +34,15 @@ class PleiepengerOppgaveTest {
     @KtorExperimentalAPI
     private companion object {
 
-        private val wireMockServer: WireMockServer = WiremockWrapper.bootstrap()
+        private val wireMockServer: WireMockServer = WireMockBuilder()
+            .withAzureSupport()
+            .withNaisStsSupport()
+            .build()
+            .stubSparkelReady()
+            .stubOppgaveReady()
+
         private val objectMapper = jacksonObjectMapper().dusseldorfConfigured()
-        private val authorizedAccessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), wireMockServer.getSubject())
+        private val authorizedAccessToken = NaisSts.generateJwt(application= "srvpps-prosessering")
 
 
         fun getConfig() : ApplicationConfig {
@@ -260,7 +268,7 @@ class PleiepengerOppgaveTest {
                 "instance": "about:blank"
             }
             """.trimIndent(),
-            accessToken = Authorization.getAccessToken(wireMockServer.baseUrl(), "srvnotauthorized")
+            accessToken = NaisSts.generateJwt(application = "srvnotauthorized")
         )
     }
 

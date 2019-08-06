@@ -183,11 +183,11 @@ fun WireMockServer.getTokenUrl() : String {
     return baseUrl() + tokenPath
 }
 
-fun WireMockServer.getSparkelBaseUrl() : String {
+fun WireMockServer.getSparkelBaseUrl2() : String {
     return baseUrl() + sparkelPath
 }
 
-fun WireMockServer.getOppgaveBaseUrl() : String {
+fun WireMockServer.getOppgaveBaseUrl2() : String {
     return baseUrl() + oppgavePath
 }
 
