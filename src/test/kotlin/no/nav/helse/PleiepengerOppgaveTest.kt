@@ -14,6 +14,7 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.dusseldorf.ktor.jackson.dusseldorfConfigured
+import no.nav.helse.dusseldorf.ktor.testsupport.jws.Azure
 import no.nav.helse.dusseldorf.ktor.testsupport.jws.NaisSts
 import no.nav.helse.dusseldorf.ktor.testsupport.wiremock.WireMockBuilder
 import no.nav.helse.oppgave.v1.Barn
@@ -48,7 +49,11 @@ class PleiepengerOppgaveTest {
 
         fun getConfig() : ApplicationConfig {
             val fileConfig = ConfigFactory.load()
-            val testConfig = ConfigFactory.parseMap(TestConfiguration.asMap(wireMockServer = wireMockServer))
+            val testConfig = ConfigFactory.parseMap(TestConfiguration.asMap(
+                wireMockServer = wireMockServer,
+                pleiepengerOppgaveAzureClientId = "pleiepenger-oppgave",
+                azureAuthorizedClients = setOf("pleiepengesoknad-prosessering")
+            ))
             val mergedConfig = testConfig.withFallback(fileConfig)
 
             return HoconApplicationConfig(mergedConfig)
@@ -109,7 +114,13 @@ class PleiepengerOppgaveTest {
     }
 
     @Test
-    fun `gyldig melding med aktoerID paa barn foerer til en opprettet oppgave med oppgaveID`() {
+    fun `gyldig medling med aktoer ID paa barn foerer til en opprettet oppgave med oppgaveID`() {
+        gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(authorizedAccessToken)
+        gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(Azure.V1_0.generateJwt(clientId = "pleiepengesoknad-prosessering", audience = "pleiepenger-oppgave"))
+        gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(Azure.V2_0.generateJwt(clientId = "pleiepengesoknad-prosessering", audience = "pleiepenger-oppgave"))
+    }
+
+    private fun gyldigMeldingMedAktoerIDPaaBarnFoererTilEnOpprettetOppgaveMedOppgaveID(accessToken: String) {
         val sokerAktoerId = "7894561"
         val barnAktoerId = "997788"
         val oppgaveId = "4561231"
@@ -133,6 +144,7 @@ class PleiepengerOppgaveTest {
         )
 
         requestAndAssert(
+            accessToken = accessToken,
             request = request,
             expectedResponse = """
                 {

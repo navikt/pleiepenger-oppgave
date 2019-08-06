@@ -12,7 +12,9 @@ object TestConfiguration {
         port : Int = 8080,
         sparkelBaseUrl : String? = wireMockServer?.getSparkelBaseUrl(),
         oppgaveBaseUrl : String? = wireMockServer?.getOppgaveBaseUrl(),
-        naisStsAuthoriedClients: Set<String> = setOf("srvpps-prosessering")
+        naisStsAuthoriedClients: Set<String> = setOf("srvpps-prosessering"),
+        azureAuthorizedClients: Set<String> = setOf("azure-client-1", "azure-client-2","azure-client-3"),
+        pleiepengerOppgaveAzureClientId: String = "srvpleiepenger-opp"
     ) : Map<String, String> {
         val map = mutableMapOf(
             Pair("ktor.deployment.port","$port"),
@@ -35,23 +37,21 @@ object TestConfiguration {
             map["nav.auth.nais-sts.authorized_clients"] = naisStsAuthoriedClients.joinToString(", ")
         }
 
-//        if (wireMockServer != null && konfigurerAzureIssuer) {
-//            if (pleiepengerJoarkAzureClientId == null) throw IllegalStateException("pleiepengerJoarkAzureClientId må settes når Azure skal konfigureres.")
-//
-//            map["nav.auth.issuers.1.type"] = "azure"
-//            map["nav.auth.issuers.1.alias"] = "azure-v1"
-//            map["nav.auth.issuers.1.discovery_endpoint"] = wireMockServer.getAzureV1WellKnownUrl()
-//            map["nav.auth.issuers.1.audience"] = pleiepengerJoarkAzureClientId
-//            map["nav.auth.issuers.1.azure.require_certificate_client_authentication"] = "true"
-//            map["nav.auth.issuers.1.azure.authorized_clients"] = azureAuthorizedClients.joinToString(",")
-//
-//            map["nav.auth.issuers.2.type"] = "azure"
-//            map["nav.auth.issuers.2.alias"] = "azure-v2"
-//            map["nav.auth.issuers.2.discovery_endpoint"] = wireMockServer.getAzureV2WellKnownUrl()
-//            map["nav.auth.issuers.2.audience"] = pleiepengerJoarkAzureClientId
-//            map["nav.auth.issuers.2.azure.require_certificate_client_authentication"] = "true"
-//            map["nav.auth.issuers.2.azure.authorized_clients"] = azureAuthorizedClients.joinToString(",")
-//        }
+        if (wireMockServer != null) {
+            map["nav.auth.issuers.1.type"] = "azure"
+            map["nav.auth.issuers.1.alias"] = "azure-v1"
+            map["nav.auth.issuers.1.discovery_endpoint"] = wireMockServer.getAzureV1WellKnownUrl()
+            map["nav.auth.issuers.1.audience"] = pleiepengerOppgaveAzureClientId
+            map["nav.auth.issuers.1.azure.require_certificate_client_authentication"] = "true"
+            map["nav.auth.issuers.1.azure.authorized_clients"] = azureAuthorizedClients.joinToString(",")
+
+            map["nav.auth.issuers.2.type"] = "azure"
+            map["nav.auth.issuers.2.alias"] = "azure-v2"
+            map["nav.auth.issuers.2.discovery_endpoint"] = wireMockServer.getAzureV2WellKnownUrl()
+            map["nav.auth.issuers.2.audience"] = pleiepengerOppgaveAzureClientId
+            map["nav.auth.issuers.2.azure.require_certificate_client_authentication"] = "true"
+            map["nav.auth.issuers.2.azure.authorized_clients"] = azureAuthorizedClients.joinToString(",")
+        }
 
         return map.toMap()
     }
