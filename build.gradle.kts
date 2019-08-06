@@ -33,8 +33,8 @@ dependencies {
     testCompile("io.ktor:ktor-server-test-host:$ktorVersion") {
         exclude(group = "org.eclipse.jetty")
     }
-    testCompile("au.com.dius:pact-jvm-consumer-junit_2.12:3.6.2")
-    testCompile("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0") // TODO: Bytte med mockk?
+    testCompile("au.com.dius:pact-jvm-consumer-junit_2.12:3.6.12")
+    testCompile("io.mockk:mockk:1.9.3")
     testCompile("org.skyscreamer:jsonassert:1.5.0")
 }
 
