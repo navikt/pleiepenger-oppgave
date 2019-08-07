@@ -15,7 +15,6 @@ import io.ktor.server.testing.setBody
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.dusseldorf.ktor.jackson.dusseldorfConfigured
 import no.nav.helse.dusseldorf.ktor.testsupport.jws.Azure
-import no.nav.helse.dusseldorf.ktor.testsupport.jws.NaisSts
 import no.nav.helse.dusseldorf.ktor.testsupport.wiremock.WireMockBuilder
 import no.nav.helse.oppgave.v1.Barn
 import no.nav.helse.oppgave.v1.MeldingV1
@@ -26,7 +25,6 @@ import org.skyscreamer.jsonassert.JSONAssert
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.test.*
-
 
 @KtorExperimentalAPI
 class PleiepengerOppgaveTest {
@@ -44,8 +42,7 @@ class PleiepengerOppgaveTest {
             .stubOppgaveReady()
 
         private val objectMapper = jacksonObjectMapper().dusseldorfConfigured()
-        private val authorizedAccessToken = NaisSts.generateJwt(application= "srvpps-prosessering")
-
+        private val authorizedAccessToken = Azure.V1_0.generateJwt(clientId = "pleiepengesoknad-prosessering", audience = "pleiepenger-oppgave")
 
         fun getConfig() : ApplicationConfig {
             val fileConfig = ConfigFactory.load()
@@ -281,7 +278,7 @@ class PleiepengerOppgaveTest {
                 "instance": "about:blank"
             }
             """.trimIndent(),
-            accessToken = NaisSts.generateJwt(application = "srvnotauthorized")
+            accessToken = Azure.V1_0.generateJwt(clientId = "not-authotized", audience = "pleiepenger-oppgave")
         )
     }
 
@@ -312,7 +309,6 @@ class PleiepengerOppgaveTest {
                 } else {
                     assertEquals(expectedResponse, response.content)
                 }
-
             }
         }
     }
