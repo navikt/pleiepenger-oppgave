@@ -12,9 +12,8 @@ object TestConfiguration {
         port : Int = 8080,
         sparkelBaseUrl : String? = wireMockServer?.getSparkelBaseUrl(),
         oppgaveBaseUrl : String? = wireMockServer?.getOppgaveBaseUrl(),
-        naisStsAuthoriedClients: Set<String> = setOf("srvpps-prosessering"),
         azureAuthorizedClients: Set<String> = setOf("azure-client-1", "azure-client-2","azure-client-3"),
-        pleiepengerOppgaveAzureClientId: String = "srvpleiepenger-opp"
+        pleiepengerOppgaveAzureClientId: String = "pleiepenger-oppgave"
     ) : Map<String, String> {
         val map = mutableMapOf(
             Pair("ktor.deployment.port","$port"),
@@ -30,27 +29,20 @@ object TestConfiguration {
             map["nav.auth.clients.0.discovery_endpoint"] = wireMockServer.getNaisStsWellKnownUrl()
         }
 
-        // Issuers
         if (wireMockServer != null) {
-            map["nav.auth.issuers.0.alias"] = "nais-sts"
-            map["nav.auth.issuers.0.discovery_endpoint"] = wireMockServer.getNaisStsWellKnownUrl()
-            map["nav.auth.nais-sts.authorized_clients"] = naisStsAuthoriedClients.joinToString(", ")
-        }
+            map["nav.auth.issuers.0.type"] = "azure"
+            map["nav.auth.issuers.0.alias"] = "azure-v1"
+            map["nav.auth.issuers.0.discovery_endpoint"] = wireMockServer.getAzureV1WellKnownUrl()
+            map["nav.auth.issuers.0.audience"] = pleiepengerOppgaveAzureClientId
+            map["nav.auth.issuers.0.azure.require_certificate_client_authentication"] = "true"
+            map["nav.auth.issuers.0.azure.authorized_clients"] = azureAuthorizedClients.joinToString(",")
 
-        if (wireMockServer != null) {
             map["nav.auth.issuers.1.type"] = "azure"
-            map["nav.auth.issuers.1.alias"] = "azure-v1"
-            map["nav.auth.issuers.1.discovery_endpoint"] = wireMockServer.getAzureV1WellKnownUrl()
+            map["nav.auth.issuers.1.alias"] = "azure-v2"
+            map["nav.auth.issuers.1.discovery_endpoint"] = wireMockServer.getAzureV2WellKnownUrl()
             map["nav.auth.issuers.1.audience"] = pleiepengerOppgaveAzureClientId
             map["nav.auth.issuers.1.azure.require_certificate_client_authentication"] = "true"
             map["nav.auth.issuers.1.azure.authorized_clients"] = azureAuthorizedClients.joinToString(",")
-
-            map["nav.auth.issuers.2.type"] = "azure"
-            map["nav.auth.issuers.2.alias"] = "azure-v2"
-            map["nav.auth.issuers.2.discovery_endpoint"] = wireMockServer.getAzureV2WellKnownUrl()
-            map["nav.auth.issuers.2.audience"] = pleiepengerOppgaveAzureClientId
-            map["nav.auth.issuers.2.azure.require_certificate_client_authentication"] = "true"
-            map["nav.auth.issuers.2.azure.authorized_clients"] = azureAuthorizedClients.joinToString(",")
         }
 
         return map.toMap()
