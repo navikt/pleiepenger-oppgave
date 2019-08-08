@@ -1,0 +1,5 @@
+# nais
+
+## Må settes i Vault
+- `SERVICE_ACCOUNT_CLIENT_ID`
+- `SERVICE_ACCOUNT_CLIENT_SECRET`

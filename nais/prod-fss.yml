@@ -44,8 +44,6 @@ spec:
       value: https://sparkel.nais.adeo.no
     - name: NAIS_STS_DISCOVERY_ENDPOINT
       value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
-    - name: NAIS_STS_AUTHORIZED_CLIENTS
-      value: srvpps-prosessering
     - name: AZURE_V1_DISCOVERY_ENDPOINT
       value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/.well-known/openid-configuration
     - name: AZURE_V2_DISCOVERY_ENDPOINT
