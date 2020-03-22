@@ -83,7 +83,7 @@ class SparkelGateway(
         }
     }
 
-    private fun queryParameters(
+    private fun queryParameters (
         tema: Tema,
         medAktoerer: List<AktoerId>
     ) : Map<String, List<String>> {
